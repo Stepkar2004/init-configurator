@@ -22,6 +22,7 @@ from init_configurator.env_contract import write_env_example
 from init_configurator.languages import InstallStep, provider_for
 from init_configurator.manifest import Manifest
 from init_configurator.presets.common import root_files
+from init_configurator.textfile import write_text_lf
 
 GITKEEP = "# Keeps this declared-but-empty directory in git.\n"
 
@@ -97,7 +98,7 @@ def write_missing(root: Path, files: dict[str, str]) -> list[str]:
             report.append(f"skipped {relpath} (exists)")
             continue
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(content, encoding="utf-8")
+        write_text_lf(target, content)
         report.append(f"created {relpath}")
     return report
 

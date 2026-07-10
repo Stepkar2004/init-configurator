@@ -20,6 +20,7 @@ provider is a bug in this file, not bad user input.
 from __future__ import annotations
 
 import sys
+import tomllib
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -55,7 +56,7 @@ class LanguageProvider(Protocol):
 
     @property
     def install_dir(self) -> str:
-        """In-project dependency directory: proof that install ran. No global installs."""
+        """In-project dependency directory. No global installs; doctor names it."""
         ...
 
     @property
@@ -76,6 +77,15 @@ class LanguageProvider(Protocol):
 
     def install_steps(self, stack: Stack, stack_root: Path) -> list[InstallStep]:
         """The commands that create this stack's in-project environment."""
+        ...
+
+    def install_ok(self, stack_root: Path) -> bool:
+        """Did install actually produce a usable environment here?
+
+        ``install_dir`` existing answers "did something run", not "did it
+        finish" -- an interrupted install leaves the directory behind. Each
+        provider names an artifact its package manager writes last.
+        """
         ...
 
     def dockerfile_body(self, stack: Stack) -> str:
@@ -107,11 +117,24 @@ class PythonProvider:
         venv_python = (
             stack_root / ".venv" / ("Scripts" if sys.platform == "win32" else "bin") / "python"
         )
+        pip = (str(venv_python), "-m", "pip", "install")
         steps = [
             InstallStep(
                 f"create ./.venv ({stack.name})", ("python", "-m", "venv", ".venv"), stack_root
             )
         ]
+        # `pip install -e .` does NOT install PEP 735 dependency-groups, so a pip
+        # stack used to declare ruff/mypy/pytest and then ship a venv without them.
+        # Installing the group needs pip >= 25.1; a fresh venv bundles an older one.
+        dev_group = _declares_dev_group(stack_root / "pyproject.toml")
+        if dev_group:
+            steps.append(
+                InstallStep(
+                    f"upgrade pip in ./.venv ({stack.name})",
+                    (*pip, "--upgrade", "pip"),
+                    stack_root,
+                )
+            )
         for dependency_file in stack.dependency_files:
             install_args = (
                 ("-e", ".") if dependency_file == "pyproject.toml" else ("-r", dependency_file)
@@ -119,11 +142,24 @@ class PythonProvider:
             steps.append(
                 InstallStep(
                     f"pip install from {dependency_file} ({stack.name})",
-                    (str(venv_python), "-m", "pip", "install", *install_args),
+                    (*pip, *install_args),
+                    stack_root,
+                )
+            )
+        if dev_group:
+            steps.append(
+                InstallStep(
+                    f"pip install the dev dependency-group ({stack.name})",
+                    (*pip, "--group", "dev"),
                     stack_root,
                 )
             )
         return steps
+
+    def install_ok(self, stack_root: Path) -> bool:
+        # pyvenv.cfg, not the directory: `python -m venv` and `uv sync` both write
+        # it, on every platform, and only once the interpreter is in place.
+        return (stack_root / self.install_dir / "pyvenv.cfg").is_file()
 
     def dockerfile_body(self, stack: Stack) -> str:
         if stack.package_manager != "uv":
@@ -168,6 +204,11 @@ class NodeProvider:
             )
         ]
 
+    def install_ok(self, stack_root: Path) -> bool:
+        # An empty node_modules/ is what a failed or interrupted install leaves.
+        modules = stack_root / self.install_dir
+        return modules.is_dir() and any(modules.iterdir())
+
     def dockerfile_body(self, stack: Stack) -> str:
         corepack = "RUN corepack enable\n" if stack.package_manager == "pnpm" else ""
         lockfile = "pnpm-lock.yaml*" if stack.package_manager == "pnpm" else "package-lock.json*"
@@ -179,6 +220,22 @@ COPY package.json {lockfile} ./
 RUN {stack.package_manager} install
 COPY . .
 """
+
+
+def _declares_dev_group(pyproject: Path) -> bool:
+    """Does this pyproject declare a PEP 735 ``dev`` dependency-group?
+
+    Read from disk at step-build time -- scaffolding has already written any
+    missing files by then. A project that hand-wrote a pyproject without a dev
+    group must not have ``pip install --group dev`` run against it: pip exits
+    non-zero on a group that isn't there, and init would fail on a valid project.
+    """
+    try:
+        data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+    except (OSError, tomllib.TOMLDecodeError):
+        return False
+    groups = data.get("dependency-groups")
+    return isinstance(groups, dict) and "dev" in groups
 
 
 def _python_pip_body(stack: Stack) -> str:

@@ -40,6 +40,7 @@ class TestStackChecks:
     ) -> None:
         (tmp_path / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
         (tmp_path / ".venv").mkdir()
+        (tmp_path / ".venv" / "pyvenv.cfg").write_text("version = 3.12\n", encoding="utf-8")
         results = run_doctor(build_manifest(), tmp_path)
         assert not has_failures(results)
         assert all(result.status is Status.OK for result in results)
@@ -87,6 +88,21 @@ class TestStackChecks:
         checks = results_by_name(results)
         assert checks["install:api"].status is Status.WARN
         assert not has_failures(results)
+
+    def test_a_half_installed_venv_is_not_reported_as_ready(
+        self, tmp_path: Path, fake_binaries: Binaries, build_manifest: ManifestFactory
+    ) -> None:
+        # An empty .venv/ is what an interrupted install leaves behind. Doctor
+        # used to call that healthy: the check asked only whether the directory
+        # was there, which answers "did something run", not "can I work here".
+        (tmp_path / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
+        (tmp_path / ".venv").mkdir()
+        checks = results_by_name(run_doctor(build_manifest(), tmp_path))
+        assert checks["install:api"].status is Status.WARN
+
+        (tmp_path / ".venv" / "pyvenv.cfg").write_text("version = 3.12\n", encoding="utf-8")
+        checks = results_by_name(run_doctor(build_manifest(), tmp_path))
+        assert checks["install:api"].status is Status.OK
 
 
 class TestRequiresAndDisable:

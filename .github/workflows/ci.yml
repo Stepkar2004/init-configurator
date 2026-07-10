@@ -25,8 +25,8 @@ jobs:
       - run: uv run initc lint-paths
       - run: uv run initc validate
       # The published schema is generated from the pydantic model but committed
-      # by hand; this fails the build when the two drift apart. Linux only:
-      # regenerating on Windows rewrites the file with CRLF and the diff is noise.
+      # by hand; this fails the build when the two drift apart. Runs on both OSes:
+      # generated files are written LF (textfile.py) and checked out LF
+      # (.gitattributes), so a diff here means drift and nothing else.
       - name: schema is up to date
-        if: runner.os == 'Linux'
         run: uv run initc schema && git diff --exit-code schema/

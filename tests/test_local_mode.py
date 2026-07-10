@@ -57,6 +57,25 @@ class TestPlanFiles:
         assert package["engines"]["node"] == ">=24"
         assert "frontend/tsconfig.json" in files
 
+    def test_node_build_emits_src_only_and_lint_skips_ignored_files(
+        self, node_manifest: Manifest
+    ) -> None:
+        # `biome check .` used to fail on a freshly built project: tsc compiled
+        # tests/ into dist/, and biome lints dist/ unless pointed at .gitignore.
+        files = plan_files(node_manifest)
+        build = json.loads(files["frontend/tsconfig.build.json"])
+        assert build["include"] == ["src"]
+        assert build["compilerOptions"]["rootDir"] == "src"
+        assert json.loads(files["frontend/tsconfig.json"])["compilerOptions"]["noEmit"] is True
+        biome = json.loads(files["frontend/biome.json"])
+        assert biome["vcs"]["useIgnoreFile"] is True
+        # json.dumps always expands; biome's default collapses short arrays back
+        # onto one line and then fails the tsconfigs it just read.
+        assert biome["json"]["formatter"]["expand"] == "always"
+        scripts = json.loads(files["frontend/package.json"])["scripts"]
+        assert scripts["build"] == "tsc -p tsconfig.build.json"
+        assert scripts["typecheck"] == "tsc --noEmit"
+
     def test_no_package_manager_pin_without_detected_version(self, node_manifest: Manifest) -> None:
         files = plan_files(node_manifest, pnpm_version=None)
         package = json.loads(files["frontend/package.json"])
@@ -107,6 +126,22 @@ class TestInitialize:
         assert any("skipped pyproject.toml" in line for line in report)
 
 
+class TestLineEndings:
+    """Generated files are read by tools that expect LF, on every OS."""
+
+    @pytest.mark.parametrize("manifest_name", ["python_manifest", "node_manifest"])
+    def test_nothing_scaffolded_contains_a_carriage_return(
+        self, tmp_path: Path, manifest_name: str, request: pytest.FixtureRequest
+    ) -> None:
+        # Path.write_text translates \n to os.linesep, so every file written on
+        # Windows carried CRLF and a fresh Node scaffold failed its own
+        # `biome check` -- whose formatter defaults to LF -- with 5 errors.
+        initialize(request.getfixturevalue(manifest_name), tmp_path, skip_install=True)
+        written = [path for path in tmp_path.rglob("*") if path.is_file()]
+        assert written, "the scaffold wrote nothing, so this proves nothing"
+        assert [path.name for path in written if b"\r" in path.read_bytes()] == []
+
+
 class TestInstallSteps:
     def test_uv_stack_syncs_in_stack_root(self, tmp_path: Path, python_manifest: Manifest) -> None:
         steps = install_steps(python_manifest, tmp_path)
@@ -123,6 +158,30 @@ class TestInstallSteps:
         assert argvs[1][-2:] == ("-e", ".")
         assert argvs[2][-2:] == ("-r", "requirements.txt")
         assert ".venv" in argvs[1][0]  # pip runs from inside the project venv
+
+    def test_pip_stack_installs_the_declared_dev_group(
+        self, tmp_path: Path, python_manifest: Manifest
+    ) -> None:
+        # `pip install -e .` does not install PEP 735 dependency-groups, so the
+        # ruff/mypy/pytest the preset declares never reached the venv and
+        # `initc run test` died with "pytest: command not found".
+        python_manifest.stacks[0].package_manager = "pip"
+        (tmp_path / "pyproject.toml").write_text(
+            '[dependency-groups]\ndev = ["pytest"]\n', encoding="utf-8"
+        )
+        argvs = [s.argv for s in install_steps(python_manifest, tmp_path)]
+        assert argvs[-1][-2:] == ("--group", "dev")
+        assert argvs[1][-2:] == ("--upgrade", "pip")  # --group needs pip >= 25.1
+
+    def test_pip_stack_without_a_dev_group_is_left_alone(
+        self, tmp_path: Path, python_manifest: Manifest
+    ) -> None:
+        # pip exits non-zero on a group that isn't declared: a hand-written
+        # pyproject must not turn `initc init` into a failure.
+        python_manifest.stacks[0].package_manager = "pip"
+        (tmp_path / "pyproject.toml").write_text('[project]\nname = "x"\n', encoding="utf-8")
+        argvs = [s.argv for s in install_steps(python_manifest, tmp_path)]
+        assert not any("--group" in argv for argv in argvs)
 
     def test_node_stack_installs_with_declared_manager(
         self, tmp_path: Path, node_manifest: Manifest

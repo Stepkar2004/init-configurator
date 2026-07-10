@@ -150,15 +150,21 @@ def _dependency_file_checks(stack: Stack, root: Path) -> list[CheckResult]:
 
 
 def _install_dir_check(stack: Stack, root: Path) -> CheckResult:
-    """Has local setup run yet? Missing env is a warn, not a failure."""
-    directory = provider_for(stack.language).install_dir
+    """Has local setup run yet? Missing env is a warn, not a failure.
+
+    The provider decides what "ran" means. Asking only whether the directory
+    exists answers "did something start", which is how a pip stack with no test
+    runner in its venv used to report green.
+    """
+    provider = provider_for(stack.language)
+    directory = provider.install_dir
     name = f"install:{stack.name}"
-    if (root / stack.root / directory).is_dir():
-        return CheckResult(name, Status.OK, f"./{directory} exists")
+    if provider.install_ok(root / stack.root):
+        return CheckResult(name, Status.OK, f"./{directory} is set up")
     return CheckResult(
         name,
         Status.WARN,
-        f"./{directory} not created yet",
+        f"./{directory} not created yet (or left half-installed)",
         fix="initc init",
     )
 

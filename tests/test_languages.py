@@ -7,11 +7,12 @@ would reject.
 """
 
 from pathlib import Path
+from typing import get_args
 
 import pytest
 
 from init_configurator.languages import LANGUAGES, provider_for
-from init_configurator.manifest import PACKAGE_MANAGERS, SUPPORTED_LANGUAGES
+from init_configurator.manifest import PACKAGE_MANAGERS, SUPPORTED_LANGUAGES, PackageManager
 from tests.conftest import ManifestFactory, StackFactory
 
 
@@ -24,6 +25,14 @@ def test_package_manager_tables_agree() -> None:
     # so a manager the manifest allows must be one the provider can explain.
     for language, provider in LANGUAGES.items():
         assert set(provider.package_manager_fix) == set(PACKAGE_MANAGERS[language])
+
+
+def test_the_package_manager_literal_covers_every_language_table() -> None:
+    # The Literal is what puts an enum in the exported JSON Schema; the tables
+    # are what the validator reads. A manager in one and not the other is either
+    # undeclarable or unvalidated.
+    declarable = {manager for managers in PACKAGE_MANAGERS.values() for manager in managers}
+    assert frozenset(get_args(PackageManager)) == declarable
 
 
 def test_unregistered_language_is_a_loud_bug_not_node_behavior() -> None:
@@ -53,3 +62,24 @@ class TestProviderBehavior:
         assert "package.json" in provider.preset_files(stack, manifest, pnpm_version="10.5.0")
         assert provider.install_steps(stack, Path("web"))[0].argv == ("pnpm", "install")
         assert "FROM node:24-slim" in provider.dockerfile_body(stack)
+
+
+class TestInstallOk:
+    """`install_dir` existing says something started, not that it finished."""
+
+    def test_python_wants_pyvenv_cfg_not_just_a_directory(self, tmp_path: Path) -> None:
+        provider = provider_for("python")
+        (tmp_path / ".venv").mkdir()
+        assert not provider.install_ok(tmp_path)  # an interrupted `python -m venv`
+        (tmp_path / ".venv" / "pyvenv.cfg").write_text(
+            "include-system-site-packages = false\n", encoding="utf-8"
+        )
+        assert provider.install_ok(tmp_path)
+
+    def test_node_wants_a_non_empty_node_modules(self, tmp_path: Path) -> None:
+        provider = provider_for("node")
+        modules = tmp_path / "node_modules"
+        modules.mkdir()
+        assert not provider.install_ok(tmp_path)  # what a failed install leaves
+        (modules / "vitest").mkdir()
+        assert provider.install_ok(tmp_path)

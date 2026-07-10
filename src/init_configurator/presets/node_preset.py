@@ -40,6 +40,7 @@ def files(stack: Stack, manifest: Manifest, *, pnpm_version: str | None = None) 
     return {
         "package.json": _package_json(stack, manifest, pnpm_version),
         "tsconfig.json": _tsconfig_json(),
+        "tsconfig.build.json": _tsconfig_build_json(),
         "biome.json": _biome_json(),
         "src/index.ts": INDEX_TS,
         "tests/index.test.ts": INDEX_TEST_TS,
@@ -57,7 +58,10 @@ def _package_json(stack: Stack, manifest: Manifest, pnpm_version: str | None) ->
         "private": True,
         "type": "module",
         "scripts": {
-            "build": "tsc",
+            # Two tsconfigs: `typecheck` covers src+tests and emits nothing;
+            # `build` compiles src alone, so tests never land in dist/.
+            "build": "tsc -p tsconfig.build.json",
+            "typecheck": "tsc --noEmit",
             "test": "vitest run",
             "lint": "biome check .",
             "format": "biome format --write .",
@@ -79,22 +83,45 @@ def _package_json(stack: Stack, manifest: Manifest, pnpm_version: str | None) ->
 
 
 def _tsconfig_json() -> str:
+    """The typecheck surface: everything that is source, nothing emitted."""
     content = {
         "extends": "@tsconfig/strictest/tsconfig.json",
         "compilerOptions": {
             "module": "nodenext",
             "moduleResolution": "nodenext",
-            "rootDir": ".",
-            "outDir": "dist",
+            "noEmit": True,
         },
         "include": ["src", "tests"],
     }
     return json.dumps(content, indent=2) + "\n"
 
 
+def _tsconfig_build_json() -> str:
+    """The build surface: src only, so `dist/` never contains compiled tests."""
+    content = {
+        "extends": "./tsconfig.json",
+        "compilerOptions": {
+            "noEmit": False,
+            "rootDir": "src",
+            "outDir": "dist",
+        },
+        "include": ["src"],
+    }
+    return json.dumps(content, indent=2) + "\n"
+
+
 def _biome_json() -> str:
     content = {
+        # Biome does not read .gitignore unless asked. Without this, `lint` after
+        # a `build` checks the emitted dist/ and fails on generated code.
+        "vcs": {"enabled": True, "clientKind": "git", "useIgnoreFile": True},
         "linter": {"enabled": True},
         "formatter": {"enabled": True, "indentStyle": "space"},
+        # Every .json file here is machine-written by json.dumps, which always
+        # expands. Biome's default collapses a short array onto one line, so a
+        # fresh scaffold failed its own `lint` on the tsconfigs. Telling Biome
+        # that JSON is expanded makes the generated files canonical, and leaves
+        # the default heuristics in charge of the TypeScript the user writes.
+        "json": {"formatter": {"expand": "always"}},
     }
     return json.dumps(content, indent=2) + "\n"

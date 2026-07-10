@@ -20,6 +20,7 @@ from init_configurator.env_contract import write_env_example
 from init_configurator.manifest import Manifest, ManifestError, find_manifest, load_manifest
 from init_configurator.path_lint import scan_project
 from init_configurator.runner import run_task
+from init_configurator.textfile import write_text_lf
 
 app = typer.Typer(
     name="initc",
@@ -170,7 +171,7 @@ def validate(path: PathArgument = Path(".")) -> None:
 def schema(out: SchemaOutOption = Path("schema/project.schema.json")) -> None:
     """Export the manifest's JSON Schema (gives editors autocomplete/validation)."""
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(Manifest.model_json_schema(), indent=2) + "\n", encoding="utf-8")
+    write_text_lf(out, json.dumps(Manifest.model_json_schema(), indent=2) + "\n")
     typer.echo(f"wrote {out}")
 
 

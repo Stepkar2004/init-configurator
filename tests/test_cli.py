@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import json
 import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -187,3 +189,25 @@ def test_init_then_doctor_round_trip(project: Path) -> None:
     doctor_result = runner.invoke(cli.app, ["doctor"])
     assert doctor_result.exit_code == 0, doctor_result.output
     assert "0 problems" in doctor_result.output
+
+
+@pytest.mark.skipif(shutil.which("pip") is None, reason="the round-trip shells out to real pip")
+def test_pip_flavor_installs_the_tools_it_declares(project: Path) -> None:
+    """The pip path scaffolds ruff/mypy/pytest -- the venv must actually have them.
+
+    ``pip install -e .`` does not install PEP 735 dependency-groups, so this
+    project used to end up with a venv that could not run its own `test` task,
+    while doctor called it healthy.
+    """
+    (project / "project.yaml").write_text(
+        MANIFEST.replace("package_manager: uv", "package_manager: pip"), encoding="utf-8"
+    )
+    init_result = runner.invoke(cli.app, ["init"])
+    assert init_result.exit_code == 0, init_result.output
+
+    venv_python = project / ".venv" / ("Scripts" if sys.platform == "win32" else "bin") / "python"
+    probe = "from importlib.metadata import version; print(version('pytest'), version('ruff'))"
+    installed = subprocess.run(
+        [str(venv_python), "-c", probe], capture_output=True, text=True, timeout=60
+    )
+    assert installed.returncode == 0, installed.stderr

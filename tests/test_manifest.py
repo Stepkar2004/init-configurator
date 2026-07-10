@@ -128,6 +128,12 @@ env:
         assert "not supported for python" in message
         assert "uv, pip" in message
 
+    def test_unknown_package_manager_lists_them_per_language(self, tmp_path: Path) -> None:
+        broken = VALID_MANIFEST.replace("package_manager: uv", "package_manager: nmp")
+        message = self.expect_error(tmp_path, broken)
+        assert "python: uv, pip" in message
+        assert "node: pnpm, npm" in message
+
     def test_absolute_path_rejected_windows_style(self, tmp_path: Path) -> None:
         broken = VALID_MANIFEST.replace("data: data/", 'data: "G:\\\\data"')  # path-lint: ignore
         message = self.expect_error(tmp_path, broken)
@@ -152,6 +158,40 @@ stacks:
         )
         message = self.expect_error(tmp_path, duplicated)
         assert "stack names must be unique" in message
+
+    def test_two_stacks_sharing_a_root(self, tmp_path: Path) -> None:
+        # Both presets write README.md and .gitignore at their stack root, so
+        # the second stack silently clobbered the first's -- taking `.venv/` and
+        # `__pycache__/` out of the python stack's ignore file with it.
+        collided = VALID_MANIFEST.replace(
+            "stacks:",
+            """\
+stacks:
+  - name: web
+    language: node
+    version: "24"
+    package_manager: pnpm
+    dependency_files: [package.json]
+""",
+        )
+        message = self.expect_error(tmp_path, collided)
+        assert "share the project root" in message
+        assert "overwrite each other" in message
+
+    def test_stacks_in_distinct_folders_are_fine(self, tmp_path: Path) -> None:
+        polyglot = VALID_MANIFEST.replace(
+            "stacks:",
+            """\
+stacks:
+  - name: web
+    language: node
+    version: "24"
+    root: ./frontend
+    package_manager: pnpm
+    dependency_files: [package.json]
+""",
+        )
+        assert len(load_manifest(write_manifest(tmp_path, polyglot)).stacks) == 2
 
     def test_broken_yaml_reported_as_yaml_problem(self, tmp_path: Path) -> None:
         message = self.expect_error(tmp_path, "schema_version: 1\n  bad indent: [")

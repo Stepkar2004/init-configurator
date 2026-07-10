@@ -27,8 +27,14 @@ SUPPORTED_SCHEMA_VERSIONS = frozenset({1})
 Language = Literal["python", "node"]
 SUPPORTED_LANGUAGES: frozenset[str] = frozenset(get_args(Language))
 
+# A Literal, not a plain str: the model validator below already rejects a
+# package manager that doesn't fit its language, but only once someone runs the
+# tool. The Literal is what puts an enum in the exported JSON Schema, so an
+# editor rejects `package_manager: nmp` while it is still being typed.
+PackageManager = Literal["uv", "pip", "pnpm", "npm"]
+
 # Which package managers make sense for each language (v1 scope).
-PACKAGE_MANAGERS: dict[str, tuple[str, ...]] = {
+PACKAGE_MANAGERS: dict[str, tuple[PackageManager, ...]] = {
     "python": ("uv", "pip"),
     "node": ("pnpm", "npm"),
 }
@@ -64,6 +70,11 @@ def _reject_absolute(value: str) -> str:
     return value
 
 
+def _normalize_root(value: str) -> str:
+    """``api/``, ``./api`` and ``api`` are one folder; so are ``.`` and ``./``."""
+    return PurePosixPath(value.strip()).as_posix()
+
+
 class StrictModel(BaseModel):
     """Base for all manifest sections: unknown keys are errors, not surprises."""
 
@@ -88,7 +99,7 @@ class Stack(StrictModel):
     language: Language
     version: str = Field(min_length=1)
     root: str = "."
-    package_manager: str
+    package_manager: PackageManager
     dependency_files: list[str] = Field(min_length=1)
     tasks: dict[str, str] = {}
 
@@ -202,6 +213,28 @@ class Manifest(StrictModel):
             raise ValueError(f"env var names must be unique, found duplicates: {duplicates}")
         return self
 
+    @model_validator(mode="after")
+    def _roots_are_unique(self) -> Manifest:
+        """Two stacks in one folder would scaffold on top of each other.
+
+        Every preset writes a README, a .gitignore and a tests/ dir at its stack
+        root. Sharing a root means the last stack in the list silently wins, and
+        the loser's ignore file -- the one keeping .venv or node_modules out of
+        git -- is the file that disappears.
+        """
+        seen: dict[str, str] = {}
+        for stack in self.stacks:
+            root = _normalize_root(stack.root)
+            if root in seen:
+                where = "the project root" if root == "." else f"'{stack.root}'"
+                raise ValueError(
+                    f"stacks '{seen[root]}' and '{stack.name}' share {where} - their "
+                    f"scaffolds would overwrite each other (both write README.md, "
+                    f".gitignore, tests/); give each stack its own folder via 'root:'"
+                )
+            seen[root] = stack.name
+        return self
+
 
 def find_manifest(start: Path | None = None) -> Path:
     """Walk up from ``start`` (default: cwd) to the nearest ``project.yaml``.
@@ -290,6 +323,12 @@ def _hint_for(problem: ErrorDetails) -> str | None:
     if last == "language":
         supported = ", ".join(sorted(SUPPORTED_LANGUAGES))
         return f"v1 supports: {supported}"
+    if last == "package_manager":
+        per_language = "; ".join(
+            f"{language}: {', '.join(managers)}"
+            for language, managers in sorted(PACKAGE_MANAGERS.items())
+        )
+        return f"supported per language - {per_language}"
     if last == "schema_version" and error_type == "missing":
         return "add 'schema_version: 1' at the top of the file"
     if error_type == "missing":

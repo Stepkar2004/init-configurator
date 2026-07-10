@@ -9,6 +9,7 @@ blank value so real credentials can never leak through an example file.
 from pathlib import Path
 
 from init_configurator.manifest import Manifest
+from init_configurator.textfile import write_text_lf
 
 ENV_EXAMPLE_FILENAME = ".env.example"
 
@@ -40,5 +41,5 @@ def write_env_example(manifest: Manifest, root: Path) -> Path | None:
     if content is None:
         return None
     path = root / ENV_EXAMPLE_FILENAME
-    path.write_text(content, encoding="utf-8")
+    write_text_lf(path, content)
     return path

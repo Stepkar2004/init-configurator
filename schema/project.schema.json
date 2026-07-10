@@ -170,6 +170,12 @@
           "type": "string"
         },
         "package_manager": {
+          "enum": [
+            "uv",
+            "pip",
+            "pnpm",
+            "npm"
+          ],
           "title": "Package Manager",
           "type": "string"
         },
