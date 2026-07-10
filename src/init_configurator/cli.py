@@ -1,8 +1,8 @@
 """The ``initc`` command-line interface.
 
-Implemented: ``init`` (local mode), ``run``, ``env``, ``validate``, ``schema``.
-Still to land, in build order: ``lint-paths``, ``doctor``, and docker mode
-(see docs/design/manifest-v1.md for the roadmap).
+Implemented: ``init`` (local mode), ``run``, ``env``, ``lint-paths``,
+``validate``, ``schema``. Still to land, in build order: ``doctor``, then
+docker mode (see docs/design/manifest-v1.md for the roadmap).
 """
 
 from __future__ import annotations
@@ -17,6 +17,7 @@ from init_configurator import local_mode
 from init_configurator.beacons import PrimaryChoice
 from init_configurator.env_contract import write_env_example
 from init_configurator.manifest import Manifest, ManifestError, find_manifest, load_manifest
+from init_configurator.path_lint import scan_project
 from init_configurator.runner import run_task
 
 app = typer.Typer(
@@ -107,6 +108,32 @@ def env() -> None:
         typer.echo("no env vars declared in project.yaml — nothing to generate")
     else:
         typer.echo(f"wrote {written.name} ({len(manifest.env)} vars)")
+
+
+@app.command(name="lint-paths")
+def lint_paths(
+    files: Annotated[
+        list[Path] | None,
+        typer.Argument(
+            help="Specific files to scan (as pre-commit passes them); default: whole tree."
+        ),
+    ] = None,
+) -> None:
+    """Scan for absolute paths; exit 1 when any are found."""
+    try:
+        manifest_path = find_manifest()
+        manifest = load_manifest(manifest_path)
+    except ManifestError as exc:
+        raise _fail(exc) from exc
+
+    findings = scan_project(manifest_path.parent, manifest.path_lint, files=files)
+    for finding in findings:
+        typer.echo(str(finding), err=True)
+    if findings:
+        plural = "s" if len(findings) != 1 else ""
+        typer.echo(f"FAIL: {len(findings)} absolute path{plural} found", err=True)
+        raise typer.Exit(code=1)
+    typer.echo("OK: no absolute paths found")
 
 
 @app.command()

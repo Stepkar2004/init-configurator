@@ -1,0 +1,16 @@
+# Lets any repo use path-lint as a pre-commit hook:
+#
+#   repos:
+#     - repo: <this repo's URL once published>
+#       rev: v0.1.0
+#       hooks:
+#         - id: path-lint
+#
+# pre-commit installs this package into an isolated env and passes staged
+# file names to the entry point.
+- id: path-lint
+  name: path-lint (no absolute paths)
+  description: Rejects machine-absolute paths; everything resolves from the project root.
+  entry: initc lint-paths
+  language: python
+  types: [text]

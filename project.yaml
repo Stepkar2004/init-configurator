@@ -20,7 +20,7 @@ stacks:
       typecheck: uv run mypy src
 
 path_lint:
-  include: ["**/*.py", "**/*.md", "**/*.yaml", "**/*.toml"]
-  # CLAUDE.md intentionally points at a machine-local brain note — the one
-  # allowed absolute path in this repo.
-  exclude: [".venv/", ".git/", "CLAUDE.md"]
+  include: ["**/*.py", "**/*.md", "**/*.yaml", "**/*.yml", "**/*.toml"]
+  # CLAUDE.md and the project-base skill intentionally point at a machine-local
+  # brain note — the only allowed absolute paths in this repo.
+  exclude: [".venv/", ".git/", "CLAUDE.md", ".claude/"]

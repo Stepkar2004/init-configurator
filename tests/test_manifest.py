@@ -129,12 +129,12 @@ env:
         assert "uv, pip" in message
 
     def test_absolute_path_rejected_windows_style(self, tmp_path: Path) -> None:
-        broken = VALID_MANIFEST.replace("data: data/", 'data: "G:\\\\data"')
+        broken = VALID_MANIFEST.replace("data: data/", 'data: "G:\\\\data"')  # path-lint: ignore
         message = self.expect_error(tmp_path, broken)
         assert "absolute path" in message
 
     def test_absolute_path_rejected_posix_style(self, tmp_path: Path) -> None:
-        broken = VALID_MANIFEST.replace("data: data/", "data: /home/user/data")
+        broken = VALID_MANIFEST.replace("data: data/", "data: /home/user/data")  # path-lint: ignore
         message = self.expect_error(tmp_path, broken)
         assert "absolute path" in message
 

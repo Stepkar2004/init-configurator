@@ -37,9 +37,24 @@ uv sync
 uv run initc init         # scaffold missing files + install everything in-project
 uv run initc run test     # run a manifest task from anywhere in the tree
 uv run initc env          # (re)generate .env.example from the manifest
+uv run initc lint-paths   # reject absolute paths (also a pre-commit hook + CI check)
 uv run initc validate     # checks the manifest, prints what it declares
 uv run initc schema       # exports the JSON Schema
 ```
+
+path-lint's constructive half is the helper lib — the linter forbids absolute paths,
+these make relative ones effortless from any working directory:
+
+```python
+from init_configurator import path_to, project_root
+
+config = project_root() / "config.toml"   # anchored on project.yaml, like git finds .git
+dataset = path_to("data") / "raw.csv"     # named dirs declared under paths: in the manifest
+```
+
+Lines that must SHOW an absolute path (docs, tests) append `path-lint: ignore`. This
+repo's own scanner caught the regex that detects `$HOME` — that line now carries the
+marker it inspired.
 
 `initc init` never overwrites an existing file — re-running it is always safe. It also
 drops the agent context beacons: the file your coding agent reads natively (CLAUDE.md or
@@ -50,5 +65,5 @@ Validation errors teach instead of scold — every problem names its exact spot 
 file and, where the mistake is guessable, adds a fix hint (e.g. unquoted `version: 3.12`
 → *"YAML reads an unquoted 3.12 as a number — quote it"*).
 
-Status: v1 in progress — manifest ✅ · local mode ✅ · path-lint · doctor · docker mode.
+Status: v1 in progress — manifest ✅ · local mode ✅ · path-lint ✅ · doctor · docker mode.
 Demo screencasts (fresh-machine clone → running, both modes) land here when v1 ships.
