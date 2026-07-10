@@ -1,6 +1,11 @@
 # project.yaml — manifest format v1 (design)
 
-Status: APPROVED 2026-07-09 (build order: manifest → local → path-lint → doctor → docker).
+Status: APPROVED 2026-07-09; **PARTIALLY SUPERSEDED 2026-07-10** by
+[agentic-base.md](agentic-base.md). The manifest format and every verification feature
+(validate, doctor, env contract, runner, path-lint, schema) still stand. Everything
+about GENERATION — `initc init`, presets, docker mode, the `docker:` section — was
+amputated; those sections below are kept as history and marked. Scaffolding now belongs
+to the `bootstrap` skill; the `docker:` key no longer exists in the format.
 
 ## Template vs instance (the abstract-class rule)
 
@@ -11,24 +16,23 @@ instance. Nothing stack- or project-specific ships as a default:
 - The example manifest below is what a hypothetical *downstream project* would write.
   Values like `DATABASE_URL` are illustrative instance data, not part of this tool.
 - This repo's own `project.yaml` (dogfood) declares only what THIS tool needs:
-  one python stack, no env vars, no docker services.
-- Stack presets (Ruff config, Biome config, …) are templates the scaffolder offers;
-  the "beyond lint" quality tools in them are OPTIONAL add-ons the user picks at init,
-  never forced defaults.
+  one python stack, no env vars.
+- Stack knowledge (Ruff config, Biome config, …) lives in the bootstrap skill's
+  references; "beyond lint" quality tools are OPTIONAL menu items the user picks at
+  phase 0, never forced defaults.
 
 ## Design goals
 
-1. **One file, single source of truth.** Local setup, Docker generation, `doctor`,
-   path-lint, and `.env.example` are all *derived* from the manifest — nothing is
-   declared twice.
+1. **One file, single source of truth.** `doctor`, the task runner, path-lint, and
+   `.env.example` are all *derived* from the manifest — nothing is declared twice.
 2. **Human-writable first, agent-writable second.** A beginner fills every required
    field in under a minute; a coding agent can generate it from a prompt.
 3. **Root-relative everything.** The directory containing `project.yaml` is the project
    root. Every path in the manifest (and, via path-lint, in the codebase) resolves
    from it.
 4. **The manifest stays ignorant of tool configs.** Ruff, Biome, mypy, etc. keep their
-   config in their native files (`pyproject.toml`, `biome.json`); the scaffolder writes
-   those from per-stack presets. Duplicating them in the manifest would break the
+   config in their native files (`pyproject.toml`, `biome.json`); the bootstrap skill
+   writes those at phase 0. Duplicating them in the manifest would break the
    single-source-of-truth rule for *those tools*.
 
 ## The format
@@ -48,7 +52,7 @@ project:
 stacks:
   - name: api                 # unique label; used in CLI output and compose service names
     language: python          # v1: python | node
-    version: "3.12"           # doctor verifies it; docker mode derives the base image
+    version: "3.12"           # doctor verifies it against the machine
     root: .                   # dir where dependency files and .venv/node_modules live
     package_manager: uv       # python: uv | pip · node: pnpm | npm
     dependency_files: [pyproject.toml]
@@ -81,11 +85,6 @@ path_lint:
   include: ["**/*.py", "**/*.ts", "**/*.md"]
   exclude: [".venv/", "node_modules/", "data/"]
 
-# Read ONLY in --docker mode; ignored in local mode.
-docker:
-  compose: true
-  services: [postgres:16]     # sidecar containers added to compose
-
 # Optional: silence named doctor checks this repo deliberately deviates from
 # (expo-doctor pattern; every check prints its name in doctor output).
 doctor:
@@ -106,7 +105,7 @@ doctor:
 | `requires` needs a `reason` | When doctor says "ffmpeg missing", the user immediately knows why it's needed and whether they care. |
 | Tool itself is Python | Gemini's Go/Rust advice rejected: this is a Python portfolio, Stepan owns every line (skill rule 1), and the tool shells out to package managers — CLI speed is irrelevant. Python + uv + src layout, dogfooding its own conventions. |
 
-## What the scaffolder writes (per stack preset, NOT stored in manifest)
+## What the scaffolder writes (per stack preset) — HISTORY, superseded 2026-07-10
 
 Each preset writes a small CORE, and nothing else. The add-ons listed under ROADMAP
 below are researched but **not implemented in v1** — none of them is written today.
@@ -154,12 +153,10 @@ must not force a security scanner or a bundle budget onto a project that never a
 polyglot repos — init-configurator already guarantees Python exists, and one manager
 beats husky+pre-commit fighting over `.git/hooks`.
 
-## CLI surface (v1)
+## CLI surface (post-pivot; `init` removed 2026-07-10)
 
 ```
-initc init [--docker] [--skip-install] [--agent agents|claude]
-                                # scaffold from project.yaml; local install is the default,
-                                # --docker generates Dockerfile/compose instead
+initc describe [PATH]           # inspect an existing repo, draft its project.yaml
 initc doctor                    # verify binaries/versions/env contract; ok/warn/fail
 initc run <task> [--stack NAME] # run a manifest task from anywhere in the tree
 initc env                       # (re)generate .env.example; diff against manifest
@@ -183,7 +180,7 @@ Every check prints its name, and `doctor.disable` in the manifest takes those na
 | `env:<VAR>` | a required env var is set (shell env or `.env`) |
 | `env-sync` | `.env.example` matches the manifest's env list, both directions |
 
-## Build order (scope v1, approved 2026-07-09)
+## Build order (scope v1, approved 2026-07-09) — HISTORY; steps 2 and 5 were later amputated
 
 1. Manifest: pydantic models, loader, validation errors that teach, JSON Schema export.
 2. Local mode: scaffold + in-project envs, presets, context beacons.

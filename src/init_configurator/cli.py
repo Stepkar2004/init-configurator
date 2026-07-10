@@ -1,8 +1,9 @@
 """The ``initc`` command-line interface.
 
-Full v1 surface: ``init`` (local or ``--docker``), ``run``, ``env``,
-``lint-paths``, ``doctor``, ``validate``, ``schema``. Format spec and design
-rationale: docs/design/manifest-v1.md.
+The tool answers questions; it does not write your project. Surface:
+``validate``, ``doctor``, ``env``, ``run``, ``lint-paths``, ``schema``, and
+``describe`` (draft a manifest for an existing repo). Generation belongs to an
+agent guided by ``.claude/skills/`` -- see docs/design/agentic-base.md.
 """
 
 from __future__ import annotations
@@ -13,32 +14,31 @@ from typing import Annotated
 
 import typer
 
-from init_configurator import docker_mode, local_mode
-from init_configurator.beacons import PrimaryChoice
+from init_configurator.describe import DescribeError, render_draft
 from init_configurator.doctor import format_results, has_failures, run_doctor
 from init_configurator.env_contract import write_env_example
-from init_configurator.manifest import Manifest, ManifestError, find_manifest, load_manifest
+from init_configurator.manifest import (
+    MANIFEST_FILENAME,
+    Manifest,
+    ManifestError,
+    find_manifest,
+    load_manifest,
+)
 from init_configurator.path_lint import scan_project
 from init_configurator.runner import run_task
 from init_configurator.textfile import write_text_lf
 
 app = typer.Typer(
     name="initc",
-    help="Clone-and-run project setup driven by one project.yaml.",
+    help="Deterministic checks for a project described by one project.yaml.",
     no_args_is_help=True,
 )
 
 PathArgument = Annotated[
     Path, typer.Argument(help="A project.yaml, or a directory containing one.")
 ]
+DescribeArgument = Annotated[Path, typer.Argument(help="The repo to inspect.")]
 SchemaOutOption = Annotated[Path, typer.Option(help="Where to write the JSON Schema.")]
-AgentOption = Annotated[
-    str,
-    typer.Option(
-        "--agent",
-        help="Which agent file is primary: 'agents' (AGENTS.md) or 'claude' (CLAUDE.md).",
-    ),
-]
 
 
 def _fail(error: Exception) -> typer.Exit:
@@ -47,36 +47,24 @@ def _fail(error: Exception) -> typer.Exit:
 
 
 @app.command()
-def init(
-    docker: Annotated[
-        bool, typer.Option("--docker", help="Generate docker setup instead.")
-    ] = False,
-    skip_install: Annotated[
-        bool, typer.Option("--skip-install", help="Scaffold only; don't install anything.")
-    ] = False,
-    agent: AgentOption = "agents",
-) -> None:
-    """Materialize project.yaml: scaffold + install locally, or generate docker files."""
-    if agent not in ("agents", "claude"):
-        raise _fail(ValueError("--agent must be 'agents' or 'claude'"))
-    primary: PrimaryChoice = "claude" if agent == "claude" else "agents"
-
-    try:
-        manifest_path = find_manifest()
-        manifest = load_manifest(manifest_path)
-        if docker:
-            report = docker_mode.initialize(manifest, manifest_path.parent, agent=primary)
-        else:
-            report = local_mode.initialize(
-                manifest, manifest_path.parent, skip_install=skip_install, agent=primary
+def describe(path: DescribeArgument = Path(".")) -> None:
+    """Inspect an existing repo and draft the project.yaml that describes it."""
+    root = path.resolve()
+    target = root / MANIFEST_FILENAME
+    if target.exists():
+        raise _fail(
+            ValueError(
+                f"{target} already exists - describe never overwrites; "
+                f"edit the manifest directly (it is the source of truth)"
             )
-    except (ManifestError, local_mode.SetupError) as exc:
+        )
+    try:
+        draft = render_draft(root)
+    except DescribeError as exc:
         raise _fail(exc) from exc
-
-    for line in report:
-        typer.echo(f"  {line}")
-    outcome = "docker setup generated" if docker else "set up locally"
-    typer.echo(f"OK: {manifest.project.name} {outcome}")
+    write_text_lf(target, draft)
+    typer.echo(f"drafted {MANIFEST_FILENAME} from what {root.name}/ already contains")
+    typer.echo("review every line (FILL_ME marks the gaps), then: initc validate")
 
 
 @app.command()
@@ -111,7 +99,7 @@ def env() -> None:
 
 @app.command()
 def doctor() -> None:
-    """Check binaries, versions, files, and the env contract; fail before setup does."""
+    """Check binaries, versions, files, and the env contract; fail before work does."""
     try:
         manifest_path = find_manifest()
         manifest = load_manifest(manifest_path)
@@ -164,7 +152,6 @@ def validate(path: PathArgument = Path(".")) -> None:
     typer.echo(f"  stacks: {stacks}")
     typer.echo(f"  env vars declared: {len(manifest.env)}")
     typer.echo(f"  extra binaries required: {len(manifest.requires)}")
-    typer.echo(f"  docker section: {'yes' if manifest.docker else 'no'}")
 
 
 @app.command()

@@ -78,7 +78,7 @@ class TestStackChecks:
         checks = results_by_name(run_doctor(build_manifest(), tmp_path))
         assert checks["deps:api:pyproject.toml"].status is Status.FAIL
         assert checks["deps:api:pyproject.toml"].fix is not None
-        assert "initc init" in checks["deps:api:pyproject.toml"].fix
+        assert "dependency_files" in checks["deps:api:pyproject.toml"].fix
 
     def test_missing_venv_is_a_warning_not_failure(
         self, tmp_path: Path, fake_binaries: Binaries, build_manifest: ManifestFactory
@@ -88,6 +88,18 @@ class TestStackChecks:
         checks = results_by_name(results)
         assert checks["install:api"].status is Status.WARN
         assert not has_failures(results)
+        # No install task declared, so the fix teaches the task model first.
+        assert checks["install:api"].fix is not None
+        assert "declare an install task" in checks["install:api"].fix
+
+    def test_missing_venv_fix_uses_the_declared_install_task(
+        self, tmp_path: Path, fake_binaries: Binaries, build_manifest: ManifestFactory
+    ) -> None:
+        (tmp_path / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
+        manifest = build_manifest()
+        manifest.stacks[0].tasks["install"] = "uv sync"
+        checks = results_by_name(run_doctor(manifest, tmp_path))
+        assert checks["install:api"].fix == "initc run install"
 
     def test_a_half_installed_venv_is_not_reported_as_ready(
         self, tmp_path: Path, fake_binaries: Binaries, build_manifest: ManifestFactory

@@ -30,8 +30,6 @@ paths:
 requires:
   - name: ffmpeg
     reason: audio preprocessing
-docker:
-  services: ["postgres:16"]
 """
 
 
@@ -48,7 +46,7 @@ class TestLoadValid:
         assert manifest.stacks[0].language == "python"
         assert manifest.stacks[0].tasks["test"] == "uv run pytest"
         assert manifest.env[1].secret is True
-        assert manifest.docker is not None
+        assert manifest.requires[0].reason == "audio preprocessing"
 
     def test_accepts_directory_containing_manifest(self, tmp_path: Path) -> None:
         write_manifest(tmp_path, VALID_MANIFEST)
@@ -67,7 +65,6 @@ stacks:
 """
         manifest = load_manifest(write_manifest(tmp_path, minimal))
         assert manifest.env == []
-        assert manifest.docker is None
         assert manifest.stacks[0].root == "."
         assert manifest.path_lint.include == ["**/*"]
 
@@ -160,9 +157,8 @@ stacks:
         assert "stack names must be unique" in message
 
     def test_two_stacks_sharing_a_root(self, tmp_path: Path) -> None:
-        # Both presets write README.md and .gitignore at their stack root, so
-        # the second stack silently clobbered the first's -- taking `.venv/` and
-        # `__pycache__/` out of the python stack's ignore file with it.
+        # A stack's root is its install dir and task cwd; two stacks in one
+        # folder is one folder claimed by two package managers.
         collided = VALID_MANIFEST.replace(
             "stacks:",
             """\
@@ -176,7 +172,7 @@ stacks:
         )
         message = self.expect_error(tmp_path, collided)
         assert "share the project root" in message
-        assert "overwrite each other" in message
+        assert "own folder via 'root:'" in message
 
     def test_stacks_in_distinct_folders_are_fine(self, tmp_path: Path) -> None:
         polyglot = VALID_MANIFEST.replace(
@@ -209,6 +205,6 @@ class TestFindManifest:
         nested.mkdir(parents=True)
         assert find_manifest(nested) == tmp_path / "project.yaml"
 
-    def test_missing_everywhere_suggests_init(self, tmp_path: Path) -> None:
-        with pytest.raises(ManifestError, match="initc init"):
+    def test_missing_everywhere_suggests_describe(self, tmp_path: Path) -> None:
+        with pytest.raises(ManifestError, match="initc describe"):
             find_manifest(tmp_path)

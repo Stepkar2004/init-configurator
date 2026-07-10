@@ -1,9 +1,10 @@
-"""init-configurator: clone-and-run setup for any project.
+"""init-configurator: deterministic ground truth for agent-built projects.
 
 One ``project.yaml`` manifest per repo declares languages, dependency files,
 entry-point tasks, required env vars, and data paths. Everything the tool does
-(local install, docker generation, doctor checks, path linting) is derived
-from that single file.
+(doctor checks, task running, the env contract, path linting, describing an
+existing repo) is derived from that single file. Skills know HOW, this tool
+knows WHETHER, project.yaml records WHAT.
 """
 
 from init_configurator.manifest import (

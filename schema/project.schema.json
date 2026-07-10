@@ -1,26 +1,5 @@
 {
   "$defs": {
-    "DockerConfig": {
-      "additionalProperties": false,
-      "description": "The ``docker:`` section \u2014 read only in ``--docker`` mode.",
-      "properties": {
-        "compose": {
-          "default": true,
-          "title": "Compose",
-          "type": "boolean"
-        },
-        "services": {
-          "default": [],
-          "items": {
-            "type": "string"
-          },
-          "title": "Services",
-          "type": "array"
-        }
-      },
-      "title": "DockerConfig",
-      "type": "object"
-    },
     "DoctorConfig": {
       "additionalProperties": false,
       "description": "The ``doctor:`` section \u2014 per-repo tuning of doctor checks.\n\nEvery doctor check has a name (printed in its output line); a repo that\ndeliberately deviates lists those names here instead of ignoring the whole\nreport \u2014 the expo-doctor lesson.",
@@ -257,17 +236,6 @@
         ],
         "exclude": []
       }
-    },
-    "docker": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/DockerConfig"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null
     },
     "doctor": {
       "$ref": "#/$defs/DoctorConfig",

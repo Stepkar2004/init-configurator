@@ -1,17 +1,18 @@
-"""Context beacons: the agent-facing files scaffolded into every project.
+"""Context beacons: the agent-facing files every managed project carries.
 
 The discovery chain a coding agent walks in a freshly cloned project:
 
 1. CLAUDE.md or AGENTS.md at the root — whichever the user's agent reads
    natively is the PRIMARY (full instructions); the other is a one-line
-   POINTER to it (the ``agent`` choice at init time decides which is which);
+   POINTER to it (the ``agent`` choice at bootstrap time decides which);
 2. the primary points at the instantiated project skill
    (``.claude/skills/project-base/SKILL.md``) — workflow, ground rules, and
    the repo's growing lessons;
 3. the skill points at ``project.yaml`` — the single source of truth.
 
-All of it is written once and owned by the project afterwards; init never
-overwrites any of these files.
+These functions are the TEMPLATE SOURCE the bootstrap skill materializes into
+a new project during phase 0. All of it is written once and owned by the
+project afterwards — never overwrite an existing beacon.
 """
 
 from datetime import date
@@ -100,19 +101,21 @@ description: {description}
 
 Instantiated from init-configurator on {date.today().isoformat()}. This copy EVOLVES
 with this repo and never syncs back to the template — divergence is the design.
+A lesson worth keeping goes through the evolve skill: procedure, not anecdote,
+appended below as a reviewed diff.
 
 ## The setup workflow (everything derives from project.yaml)
 
 1. `initc doctor` — is this machine ready? Three-state report, every problem
    comes with its fix.
-2. `initc init` — scaffold missing files + install everything in-project
-   (`--docker` generates Dockerfile/compose instead of installing locally).
+2. `initc run install` — installing is a declared task like any other; it
+   creates the in-project environment (./.venv or ./node_modules).
 3. `initc run <task>` — run a declared task from anywhere in the tree
    (declared here: {tasks or "none yet"}).
 4. `initc env` — regenerate .env.example after changing the env contract.
 5. `initc lint-paths` — no absolute paths, ever. `pre-commit install` wires it
-   into every commit via the generated `.pre-commit-config.yaml`; nothing
-   enforces it in CI until you add it to your workflow.
+   into every commit via `.pre-commit-config.yaml`; nothing enforces it in CI
+   until you add it to your workflow.
 
 ## Ground rules
 
@@ -120,9 +123,10 @@ with this repo and never syncs back to the template — divergence is the design
 - Root-relative paths only — use `project_root()` / `path_to()` from the
   `init_configurator` package instead of building paths by hand.
 - No global installs: dependencies live in ./.venv or ./node_modules.
+- The env rule: the same turn code first reads a new env var, declare it in
+  project.yaml and re-run `initc env` — doctor's env-sync check fails on drift.
 - Generated files (.env.example) say so in their header — edit the manifest,
-  not the artifact. Scaffolded files (everything else) are yours to edit;
-  init never overwrites an existing file.
+  not the artifact. Everything else is yours to edit.
 
 ## Lessons (append one line per real session: date · lesson; prune when stale)
 

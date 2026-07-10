@@ -1,18 +1,14 @@
 """Tests for the ``initc`` command line: every command, happy path and error path.
 
-The product IS a CLI, so this file exercises it the way a user does. The last
-test is the one that matters most: it runs a real ``initc init`` (real
-``uv sync``) against a fresh project and then a real ``initc doctor``. Without
-it, a scaffolded ``pyproject.toml`` pointing at a README nobody wrote shipped
-as a hard exit-1 on the tool's headline command.
+The product IS a CLI, so this file exercises it the way a user does. The
+round-trip test is the one that matters most: ``initc describe`` against a real
+repo must draft a manifest that ``initc validate`` then accepts -- a tool whose
+two commands disagree with each other teaches nothing.
 """
 
 from __future__ import annotations
 
 import json
-import shutil
-import subprocess
-import sys
 from pathlib import Path
 
 import pytest
@@ -142,27 +138,18 @@ class TestDoctor:
         assert "fix: install uv" in result.output
 
 
-class TestInit:
-    def test_scaffolds_without_installing(self, project: Path) -> None:
-        result = runner.invoke(cli.app, ["init", "--skip-install"])
-        assert result.exit_code == 0
-        assert "OK: demo-app set up locally" in result.output
-        assert (project / "pyproject.toml").is_file()
-        assert (project / "README.md").is_file()
-        assert (project / "src" / "demo_app" / "__init__.py").is_file()
-        assert (project / "AGENTS.md").is_file()
-
-    def test_docker_mode_generates_container_files(self, project: Path) -> None:
-        result = runner.invoke(cli.app, ["init", "--docker"])
-        assert result.exit_code == 0
-        assert "docker setup generated" in result.output
-        assert (project / "Dockerfile").is_file()
-        assert (project / "compose.yaml").is_file()
-
-    def test_unknown_agent_is_rejected(self, project: Path) -> None:
-        result = runner.invoke(cli.app, ["init", "--agent", "copilot"])
+class TestDescribe:
+    def test_never_overwrites_an_existing_manifest(self, project: Path) -> None:
+        result = runner.invoke(cli.app, ["describe", str(project)])
         assert result.exit_code == 1
-        assert "--agent must be" in result.output
+        assert "already exists" in result.output
+        # The manifest kept its original content.
+        assert "demo-app" in (project / "project.yaml").read_text(encoding="utf-8")
+
+    def test_undescribable_repo_says_what_it_looked_for(self, tmp_path: Path) -> None:
+        result = runner.invoke(cli.app, ["describe", str(tmp_path)])
+        assert result.exit_code == 1
+        assert "pyproject.toml" in result.output
 
 
 class TestRun:
@@ -175,39 +162,19 @@ class TestRun:
         assert "available: api:hello" in result.output
 
 
-@pytest.mark.skipif(shutil.which("uv") is None, reason="the round-trip shells out to real uv")
-def test_init_then_doctor_round_trip(project: Path) -> None:
-    """The one test that installs for real: scaffold -> uv sync -> doctor, all green.
-
-    ``initc init`` used to exit 1 here, because the pyproject it wrote declared
-    a readme it never created and hatchling refused to build the project.
-    """
-    init_result = runner.invoke(cli.app, ["init"])
-    assert init_result.exit_code == 0, init_result.output
-    assert (project / ".venv").is_dir()
-
-    doctor_result = runner.invoke(cli.app, ["doctor"])
-    assert doctor_result.exit_code == 0, doctor_result.output
-    assert "0 problems" in doctor_result.output
-
-
-@pytest.mark.skipif(shutil.which("pip") is None, reason="the round-trip shells out to real pip")
-def test_pip_flavor_installs_the_tools_it_declares(project: Path) -> None:
-    """The pip path scaffolds ruff/mypy/pytest -- the venv must actually have them.
-
-    ``pip install -e .`` does not install PEP 735 dependency-groups, so this
-    project used to end up with a venv that could not run its own `test` task,
-    while doctor called it healthy.
-    """
-    (project / "project.yaml").write_text(
-        MANIFEST.replace("package_manager: uv", "package_manager: pip"), encoding="utf-8"
+def test_describe_then_validate_round_trip(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """The tool must accept its own draft: describe -> validate, both green."""
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nname = "found-repo"\nrequires-python = ">=3.12"\n', encoding="utf-8"
     )
-    init_result = runner.invoke(cli.app, ["init"])
-    assert init_result.exit_code == 0, init_result.output
+    (tmp_path / "uv.lock").write_text("# lock\n", encoding="utf-8")
+    (tmp_path / "tests").mkdir()
+    monkeypatch.chdir(tmp_path)
 
-    venv_python = project / ".venv" / ("Scripts" if sys.platform == "win32" else "bin") / "python"
-    probe = "from importlib.metadata import version; print(version('pytest'), version('ruff'))"
-    installed = subprocess.run(
-        [str(venv_python), "-c", probe], capture_output=True, text=True, timeout=60
-    )
-    assert installed.returncode == 0, installed.stderr
+    described = runner.invoke(cli.app, ["describe"])
+    assert described.exit_code == 0, described.output
+    assert (tmp_path / "project.yaml").is_file()
+
+    validated = runner.invoke(cli.app, ["validate"])
+    assert validated.exit_code == 0, validated.output
+    assert "OK: found-repo" in validated.output

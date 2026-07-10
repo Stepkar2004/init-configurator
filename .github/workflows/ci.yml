@@ -7,8 +7,8 @@ on:
 
 jobs:
   checks:
-    # Development happens on Windows, deployment on Linux. local_mode has a
-    # sys.platform == "win32" branch, so a Linux-only matrix never runs it.
+    # Development happens on Windows, CI consumers on Linux. Path handling and
+    # line-ending behavior (textfile.py) differ per OS, so both must run.
     strategy:
       fail-fast: false
       matrix:

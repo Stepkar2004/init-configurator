@@ -24,8 +24,8 @@ from enum import StrEnum
 from pathlib import Path
 
 from init_configurator.env_contract import ENV_EXAMPLE_FILENAME
-from init_configurator.languages import provider_for
 from init_configurator.manifest import Manifest, Stack
+from init_configurator.runtimes import runtime_for
 
 VERSION_RE = re.compile(r"(\d+(?:\.\d+)*)")
 
@@ -94,7 +94,7 @@ def _package_manager_check(stack: Stack) -> CheckResult:
             name,
             Status.FAIL,
             f"'{stack.package_manager}' not found on PATH (stack '{stack.name}' installs with it)",
-            fix=provider_for(stack.language).package_manager_fix.get(stack.package_manager),
+            fix=runtime_for(stack.language).package_manager_fix.get(stack.package_manager),
         )
     return CheckResult(name, Status.OK, f"{stack.package_manager} {version}")
 
@@ -106,7 +106,7 @@ def _runtime_check(stack: Stack) -> CheckResult:
     the requested one itself during ``uv sync``. Everything else fails hard.
     """
     name = f"runtime:{stack.name}"
-    binary = provider_for(stack.language).runtime_binary
+    binary = runtime_for(stack.language).runtime_binary
     actual = _binary_version(binary)
     uv_managed = stack.package_manager == "uv"
     if actual is None:
@@ -143,7 +143,10 @@ def _dependency_file_checks(stack: Stack, root: Path) -> list[CheckResult]:
                     name,
                     Status.FAIL,
                     f"declared dependency file {dependency_file} is missing",
-                    fix="initc init  (scaffolds declared files that don't exist)",
+                    fix=(
+                        f"restore {dependency_file}, or remove it from "
+                        f"dependency_files in project.yaml"
+                    ),
                 )
             )
     return results
@@ -152,20 +155,30 @@ def _dependency_file_checks(stack: Stack, root: Path) -> list[CheckResult]:
 def _install_dir_check(stack: Stack, root: Path) -> CheckResult:
     """Has local setup run yet? Missing env is a warn, not a failure.
 
-    The provider decides what "ran" means. Asking only whether the directory
+    The runtime decides what "ran" means. Asking only whether the directory
     exists answers "did something start", which is how a pip stack with no test
     runner in its venv used to report green.
+
+    Installing is a declared task, not a special mode: the fix points at the
+    manifest's own ``install`` task when one exists, and at declaring one when
+    it doesn't.
     """
-    provider = provider_for(stack.language)
-    directory = provider.install_dir
+    runtime = runtime_for(stack.language)
+    directory = runtime.install_dir
     name = f"install:{stack.name}"
-    if provider.install_ok(root / stack.root):
+    if runtime.install_ok(root / stack.root):
         return CheckResult(name, Status.OK, f"./{directory} is set up")
+    fix = (
+        "initc run install"
+        if "install" in stack.tasks
+        else "declare an install task in project.yaml (e.g. install: uv sync), "
+        "then: initc run install"
+    )
     return CheckResult(
         name,
         Status.WARN,
         f"./{directory} not created yet (or left half-installed)",
-        fix="initc init",
+        fix=fix,
     )
 
 

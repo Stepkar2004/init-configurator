@@ -1,9 +1,9 @@
 """Load and validate ``project.yaml`` — the single source of truth.
 
-Every feature of init-configurator (local install, docker generation, doctor,
-path-lint, ``.env.example``) derives from the manifest defined here. The
-directory containing ``project.yaml`` IS the project root; every path in the
-manifest must be relative to it.
+Every feature of init-configurator (doctor, the task runner, path-lint,
+``.env.example``) derives from the manifest defined here. The directory
+containing ``project.yaml`` IS the project root; every path in the manifest
+must be relative to it.
 
 Validation errors are written to teach: each problem names the exact spot in
 the file and, where we can guess the mistake, adds a hint for fixing it.
@@ -23,7 +23,7 @@ SUPPORTED_SCHEMA_VERSIONS = frozenset({1})
 
 # Every language init-configurator can express. pydantic needs the Literal, the
 # rest of the code needs the set, and deriving one from the other keeps a new
-# language from being half-added. Each needs a provider in languages.LANGUAGES.
+# language from being half-added. Each needs an entry in runtimes.RUNTIMES.
 Language = Literal["python", "node"]
 SUPPORTED_LANGUAGES: frozenset[str] = frozenset(get_args(Language))
 
@@ -148,13 +148,6 @@ class PathLint(StrictModel):
     exclude: list[str] = []
 
 
-class DockerConfig(StrictModel):
-    """The ``docker:`` section — read only in ``--docker`` mode."""
-
-    compose: bool = True
-    services: list[str] = []
-
-
 class DoctorConfig(StrictModel):
     """The ``doctor:`` section — per-repo tuning of doctor checks.
 
@@ -176,7 +169,6 @@ class Manifest(StrictModel):
     paths: dict[str, str] = {}
     requires: list[Requirement] = []
     path_lint: PathLint = PathLint()
-    docker: DockerConfig | None = None
     doctor: DoctorConfig = DoctorConfig()
 
     @field_validator("schema_version")
@@ -215,12 +207,13 @@ class Manifest(StrictModel):
 
     @model_validator(mode="after")
     def _roots_are_unique(self) -> Manifest:
-        """Two stacks in one folder would scaffold on top of each other.
+        """Two stacks in one folder is one folder claimed twice.
 
-        Every preset writes a README, a .gitignore and a tests/ dir at its stack
-        root. Sharing a root means the last stack in the list silently wins, and
-        the loser's ignore file -- the one keeping .venv or node_modules out of
-        git -- is the file that disappears.
+        A stack's root is where its dependency files, install dir, and task
+        working directory live. Sharing it means two package managers fighting
+        over one folder and ``initc run`` resolving tasks against an ambiguous
+        cwd -- rejected here, while the message can still say which two stacks
+        collided.
         """
         seen: dict[str, str] = {}
         for stack in self.stacks:
@@ -228,9 +221,9 @@ class Manifest(StrictModel):
             if root in seen:
                 where = "the project root" if root == "." else f"'{stack.root}'"
                 raise ValueError(
-                    f"stacks '{seen[root]}' and '{stack.name}' share {where} - their "
-                    f"scaffolds would overwrite each other (both write README.md, "
-                    f".gitignore, tests/); give each stack its own folder via 'root:'"
+                    f"stacks '{seen[root]}' and '{stack.name}' share {where} - two "
+                    f"package managers would fight over one folder (one install "
+                    f"dir, one task cwd); give each stack its own folder via 'root:'"
                 )
             seen[root] = stack.name
         return self
@@ -252,7 +245,8 @@ def find_manifest(start: Path | None = None) -> Path:
             return candidate
     raise ManifestError(
         f"no {MANIFEST_FILENAME} found in {directory} or any parent folder - "
-        f"run 'initc init' to create one, or cd into a project that has one"
+        f"run 'initc describe' to draft one from the code that is already "
+        f"there, or cd into a project that has one"
     )
 
 

@@ -1,6 +1,6 @@
 # This repo's own manifest — init-configurator dogfoods its own format.
 # Note how little a real instance needs: the format allows more (env, paths,
-# requires, docker), this project just doesn't need them.
+# requires, doctor), this project just doesn't need them.
 schema_version: 1
 
 project:
@@ -15,6 +15,7 @@ stacks:
     package_manager: uv
     dependency_files: [pyproject.toml]
     tasks:
+      install: uv sync
       test: uv run pytest
       lint: uv run ruff check src tests
       typecheck: uv run mypy src

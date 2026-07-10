@@ -5,8 +5,9 @@ as mojibake there -- `unknown key <?> likely a typo` -- which is exactly the
 moment a beginner most needs the message to read cleanly. doctor.py already said
 "plain ASCII on purpose"; this makes that a rule the whole CLI is held to.
 
-Modules that WRITE files (beacons, presets, env_contract) are exempt: their
-strings become UTF-8 file contents, never console output.
+Modules that WRITE files (beacons, env_contract) are exempt: their strings
+become UTF-8 file contents, never console output. describe.py both writes and
+prints, so it is held to the rule -- its draft is ASCII anyway.
 """
 
 from __future__ import annotations
@@ -24,14 +25,13 @@ SRC = Path(__file__).resolve().parents[1] / "src" / "init_configurator"
 
 PRINTING_MODULES = [
     "cli.py",
-    "docker_mode.py",
+    "describe.py",
     "doctor.py",
-    "languages.py",
-    "local_mode.py",
     "manifest.py",
     "path_lint.py",
     "paths.py",
     "runner.py",
+    "runtimes.py",
 ]
 
 
