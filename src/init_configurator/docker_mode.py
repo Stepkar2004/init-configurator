@@ -16,6 +16,7 @@ import yaml
 
 from init_configurator import local_mode
 from init_configurator.beacons import PrimaryChoice
+from init_configurator.languages import provider_for
 from init_configurator.manifest import DockerConfig, Manifest, Stack
 
 GENERATED_HEADER = (
@@ -53,53 +54,9 @@ def docker_files(manifest: Manifest) -> dict[str, str]:
 
 
 def _dockerfile(stack: Stack) -> str:
-    if stack.language == "python":
-        body = _python_uv_body(stack) if stack.package_manager == "uv" else _python_pip_body(stack)
-    else:
-        body = _node_body(stack)
+    """Header + the language's body + a CMD taken from the manifest."""
+    body = provider_for(stack.language).dockerfile_body(stack)
     return f"{GENERATED_HEADER}{body}{_cmd_line(stack)}"
-
-
-def _python_uv_body(stack: Stack) -> str:
-    # Paths inside the image are fine by definition - only host paths break clones.
-    uv_copy = "COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv"  # path-lint: ignore
-    return f"""\
-FROM python:{stack.version}-slim
-{uv_copy}
-WORKDIR /app
-
-# Dependencies first, project second - keeps the dependency layer cached
-# across source-only changes.
-COPY pyproject.toml uv.lock* ./
-RUN uv sync --no-dev --no-install-project
-COPY . .
-RUN uv sync --no-dev
-"""
-
-
-def _python_pip_body(stack: Stack) -> str:
-    requirement_files = [f for f in stack.dependency_files if f != "pyproject.toml"]
-    lines = [f"FROM python:{stack.version}-slim", "WORKDIR /app", ""]
-    for requirement_file in requirement_files:
-        lines.append(f"COPY {requirement_file} ./")
-        lines.append(f"RUN pip install --no-cache-dir -r {requirement_file}")
-    lines.append("COPY . .")
-    if "pyproject.toml" in stack.dependency_files:
-        lines.append("RUN pip install --no-cache-dir .")
-    return "\n".join(lines) + "\n"
-
-
-def _node_body(stack: Stack) -> str:
-    corepack = "RUN corepack enable\n" if stack.package_manager == "pnpm" else ""
-    lockfile = "pnpm-lock.yaml*" if stack.package_manager == "pnpm" else "package-lock.json*"
-    return f"""\
-FROM node:{stack.version}-slim
-{corepack}WORKDIR /app
-
-COPY package.json {lockfile} ./
-RUN {stack.package_manager} install
-COPY . .
-"""
 
 
 def _cmd_line(stack: Stack) -> str:

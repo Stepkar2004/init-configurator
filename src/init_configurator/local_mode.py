@@ -15,29 +15,19 @@ from __future__ import annotations
 
 import shutil
 import subprocess
-import sys
-from dataclasses import dataclass
 from pathlib import Path
 
 from init_configurator.beacons import PrimaryChoice, context_beacons, project_skill
 from init_configurator.env_contract import write_env_example
-from init_configurator.manifest import Manifest, Stack
-from init_configurator.presets import root_files, scaffold_files
+from init_configurator.languages import InstallStep, provider_for
+from init_configurator.manifest import Manifest
+from init_configurator.presets.common import root_files
 
 GITKEEP = "# Keeps this declared-but-empty directory in git.\n"
 
 
 class SetupError(Exception):
     """A setup step failed; the message says which one and what to do next."""
-
-
-@dataclass(frozen=True)
-class InstallStep:
-    """One command local mode will run, resolved and ready to execute."""
-
-    description: str
-    argv: tuple[str, ...]
-    cwd: Path
 
 
 def initialize(
@@ -79,7 +69,10 @@ def plan_files(manifest: Manifest, *, pnpm_version: str | None = None) -> dict[s
     """
     files: dict[str, str] = {}
     for stack in manifest.stacks:
-        for relpath, content in scaffold_files(stack, manifest, pnpm_version=pnpm_version).items():
+        preset = provider_for(stack.language).preset_files(
+            stack, manifest, pnpm_version=pnpm_version
+        )
+        for relpath, content in preset.items():
             prefix = "" if stack.root == "." else f"{stack.root.rstrip('/')}/"
             files[f"{prefix}{relpath}"] = content
     # Root files fill gaps only: a stack rooted at "." already wrote its own
@@ -113,47 +106,8 @@ def install_steps(manifest: Manifest, root: Path) -> list[InstallStep]:
     """Build the install commands for every stack — pure, so tests can inspect them."""
     steps: list[InstallStep] = []
     for stack in manifest.stacks:
-        stack_root = root / stack.root
-        if stack.language == "python":
-            steps.extend(_python_steps(stack, stack_root))
-        else:
-            steps.append(
-                InstallStep(
-                    description=f"{stack.package_manager} install ({stack.name})",
-                    argv=(stack.package_manager, "install"),
-                    cwd=stack_root,
-                )
-            )
-    return steps
-
-
-def _python_steps(stack: Stack, stack_root: Path) -> list[InstallStep]:
-    if stack.package_manager == "uv":
-        return [
-            InstallStep(description=f"uv sync ({stack.name})", argv=("uv", "sync"), cwd=stack_root)
-        ]
-    # pip flavor: an in-project venv, then install each declared dependency file.
-    venv_python = (
-        stack_root / ".venv" / ("Scripts" if sys.platform == "win32" else "bin") / "python"
-    )
-    steps = [
-        InstallStep(
-            description=f"create ./.venv ({stack.name})",
-            argv=("python", "-m", "venv", ".venv"),
-            cwd=stack_root,
-        )
-    ]
-    for dependency_file in stack.dependency_files:
-        install_args = (
-            ("-e", ".") if dependency_file == "pyproject.toml" else ("-r", dependency_file)
-        )
-        steps.append(
-            InstallStep(
-                description=f"pip install from {dependency_file} ({stack.name})",
-                argv=(str(venv_python), "-m", "pip", "install", *install_args),
-                cwd=stack_root,
-            )
-        )
+        provider = provider_for(stack.language)
+        steps.extend(provider.install_steps(stack, root / stack.root))
     return steps
 
 

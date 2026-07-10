@@ -24,18 +24,10 @@ from enum import StrEnum
 from pathlib import Path
 
 from init_configurator.env_contract import ENV_EXAMPLE_FILENAME
+from init_configurator.languages import provider_for
 from init_configurator.manifest import Manifest, Stack
 
 VERSION_RE = re.compile(r"(\d+(?:\.\d+)*)")
-
-RUNTIME_BINARY = {"python": "python", "node": "node"}
-
-PACKAGE_MANAGER_FIX = {
-    "uv": "install uv: https://docs.astral.sh/uv/getting-started/installation/",
-    "pip": "install Python (pip ships with it): https://www.python.org/downloads/",
-    "pnpm": "corepack enable  (Node >= 25 ships without corepack: npm install -g corepack first)",
-    "npm": "install Node.js (npm ships with it): https://nodejs.org/",
-}
 
 
 class Status(StrEnum):
@@ -102,7 +94,7 @@ def _package_manager_check(stack: Stack) -> CheckResult:
             name,
             Status.FAIL,
             f"'{stack.package_manager}' not found on PATH (stack '{stack.name}' installs with it)",
-            fix=PACKAGE_MANAGER_FIX.get(stack.package_manager),
+            fix=provider_for(stack.language).package_manager_fix.get(stack.package_manager),
         )
     return CheckResult(name, Status.OK, f"{stack.package_manager} {version}")
 
@@ -114,7 +106,7 @@ def _runtime_check(stack: Stack) -> CheckResult:
     the requested one itself during ``uv sync``. Everything else fails hard.
     """
     name = f"runtime:{stack.name}"
-    binary = RUNTIME_BINARY[stack.language]
+    binary = provider_for(stack.language).runtime_binary
     actual = _binary_version(binary)
     uv_managed = stack.package_manager == "uv"
     if actual is None:
@@ -159,7 +151,7 @@ def _dependency_file_checks(stack: Stack, root: Path) -> list[CheckResult]:
 
 def _install_dir_check(stack: Stack, root: Path) -> CheckResult:
     """Has local setup run yet? Missing env is a warn, not a failure."""
-    directory = ".venv" if stack.language == "python" else "node_modules"
+    directory = provider_for(stack.language).install_dir
     name = f"install:{stack.name}"
     if (root / stack.root / directory).is_dir():
         return CheckResult(name, Status.OK, f"./{directory} exists")

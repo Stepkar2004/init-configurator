@@ -18,3 +18,7 @@ jobs:
       - run: uv run pytest
       - run: uv run initc lint-paths
       - run: uv run initc validate
+      # The published schema is generated from the pydantic model but committed
+      # by hand; this fails the build when the two drift apart.
+      - name: schema is up to date
+        run: uv run initc schema && git diff --exit-code schema/

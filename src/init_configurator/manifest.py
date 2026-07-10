@@ -12,7 +12,7 @@ the file and, where we can guess the mistake, adds a hint for fixing it.
 from __future__ import annotations
 
 from pathlib import Path, PurePosixPath, PureWindowsPath
-from typing import Literal
+from typing import Literal, get_args
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
@@ -20,6 +20,12 @@ from pydantic_core import ErrorDetails
 
 MANIFEST_FILENAME = "project.yaml"
 SUPPORTED_SCHEMA_VERSIONS = frozenset({1})
+
+# Every language init-configurator can express. pydantic needs the Literal, the
+# rest of the code needs the set, and deriving one from the other keeps a new
+# language from being half-added. Each needs a provider in languages.LANGUAGES.
+Language = Literal["python", "node"]
+SUPPORTED_LANGUAGES: frozenset[str] = frozenset(get_args(Language))
 
 # Which package managers make sense for each language (v1 scope).
 PACKAGE_MANAGERS: dict[str, tuple[str, ...]] = {
@@ -79,7 +85,7 @@ class Stack(StrictModel):
     """
 
     name: str = Field(min_length=1)
-    language: Literal["python", "node"]
+    language: Language
     version: str = Field(min_length=1)
     root: str = "."
     package_manager: str
@@ -282,7 +288,7 @@ def _hint_for(problem: ErrorDetails) -> str | None:
     if last == "env" and error_type == "list_type":
         return "env is a list of entries, each starting with '- name: VAR_NAME'"
     if last == "language":
-        supported = ", ".join(sorted(PACKAGE_MANAGERS))
+        supported = ", ".join(sorted(SUPPORTED_LANGUAGES))
         return f"v1 supports: {supported}"
     if last == "schema_version" and error_type == "missing":
         return "add 'schema_version: 1' at the top of the file"
