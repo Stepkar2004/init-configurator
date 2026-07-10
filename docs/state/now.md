@@ -15,5 +15,7 @@ place (7 skills under `.claude/skills/`), and all gates are green.
   2026-07; none has yet evolved from real downstream use.
 - Nothing is published; no remote configured.
 
-**Next action:** Stepan reviews the amputation (owns-every-line rule), fills or defers
-`vision.md`, then `roadmap.md` step 1.
+**Next action:** roadmap step 1 — a first downstream project spawns FROM this genome
+(new repo, per the `absorb` skill's spawn procedure; work never happens in here). Its
+frictions come back as `evolve` diffs. Then remote + publish. Stepan still owes the
+amputation review (owns-every-line rule) and `vision.md`.

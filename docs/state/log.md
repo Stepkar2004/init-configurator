@@ -2,6 +2,11 @@
 
 > One entry per chunk, newest first: date · what happened · what it proved or changed.
 
+- **2026-07-10 · Publish prep staged.** Decision: the genome gets one real downstream
+  validation (a project spawned from this base into its own repo) before publicizing.
+  README gained an honest Status section; announcement draft staged locally
+  (gitignored, with the publish checklist).
+
 - **2026-07-10 · The amputation.** Deleted presets/, local_mode, docker_mode,
   `initc init`; `languages.py` became verification-only `runtimes.py`; added
   `initc describe` (draft a manifest from an existing repo) + tests; installing became

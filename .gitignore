@@ -10,3 +10,6 @@ dist/
 .mypy_cache/
 .ruff_cache/
 .coverage
+
+# Personal working notes, never part of the repo
+*.local.md

@@ -91,6 +91,13 @@ can be passed to a new project (`spawn`) or extracted from any existing repo (`a
 How a coding agent finds its way in any managed repo: root beacon (CLAUDE.md/AGENTS.md)
 → the repo's own `project-base` skill → `project.yaml`.
 
+## Status
+
+Fresh off the pivot (2026-07). The verification tool is hardened — 107 tests, ~94%
+coverage, every gate green in CI on both Ubuntu and Windows. The skills are young:
+distilled from this repo's own hard-won lessons, now being validated on their first
+real downstream project. Demo screencast lands here with that validation.
+
 ## License
 
 [MIT](LICENSE) © Stepan Karapetiani
