@@ -1,8 +1,8 @@
 """The ``initc`` command-line interface.
 
-Implemented: ``init`` (local mode), ``run``, ``env``, ``lint-paths``,
-``doctor``, ``validate``, ``schema``. Still to land: docker mode
-(see docs/design/manifest-v1.md for the roadmap).
+Full v1 surface: ``init`` (local or ``--docker``), ``run``, ``env``,
+``lint-paths``, ``doctor``, ``validate``, ``schema``. Format spec and design
+rationale: docs/design/manifest-v1.md.
 """
 
 from __future__ import annotations
@@ -13,7 +13,7 @@ from typing import Annotated
 
 import typer
 
-from init_configurator import local_mode
+from init_configurator import docker_mode, local_mode
 from init_configurator.beacons import PrimaryChoice
 from init_configurator.doctor import format_results, has_failures, run_doctor
 from init_configurator.env_contract import write_env_example
@@ -55,14 +55,7 @@ def init(
     ] = False,
     agent: AgentOption = "agents",
 ) -> None:
-    """Materialize project.yaml: scaffold missing files and install in-project."""
-    if docker:
-        typer.echo(
-            "ERROR: docker mode is not built yet — it lands last "
-            "(after local mode, path-lint, and doctor). Use local mode for now.",
-            err=True,
-        )
-        raise typer.Exit(code=1)
+    """Materialize project.yaml: scaffold + install locally, or generate docker files."""
     if agent not in ("agents", "claude"):
         raise _fail(ValueError("--agent must be 'agents' or 'claude'"))
     primary: PrimaryChoice = "claude" if agent == "claude" else "agents"
@@ -70,15 +63,19 @@ def init(
     try:
         manifest_path = find_manifest()
         manifest = load_manifest(manifest_path)
-        report = local_mode.initialize(
-            manifest, manifest_path.parent, skip_install=skip_install, agent=primary
-        )
+        if docker:
+            report = docker_mode.initialize(manifest, manifest_path.parent, agent=primary)
+        else:
+            report = local_mode.initialize(
+                manifest, manifest_path.parent, skip_install=skip_install, agent=primary
+            )
     except (ManifestError, local_mode.SetupError) as exc:
         raise _fail(exc) from exc
 
     for line in report:
         typer.echo(f"  {line}")
-    typer.echo(f"OK: {manifest.project.name} is set up locally")
+    outcome = "docker setup generated" if docker else "set up locally"
+    typer.echo(f"OK: {manifest.project.name} {outcome}")
 
 
 @app.command()

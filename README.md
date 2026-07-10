@@ -79,5 +79,24 @@ problem like brew doctor, and named, per-repo-disableable checks like expo docto
 Doctor: 3 ok, 1 warnings, 0 problems
 ```
 
-Status: v1 in progress — manifest ✅ · local mode ✅ · path-lint ✅ · doctor ✅ · docker mode.
+## Docker mode
+
+`initc init --docker` scaffolds the same starter files, skips local installs, and
+generates one Dockerfile per stack (dependency layer cached separately from source,
+CMD taken from the manifest's `start` task) plus a `compose.yaml` wiring your stacks
+and declared sidecars (`services: ["postgres:16"]`). Generated docker files follow the
+same rule as everything else: never overwritten, so hand edits stick.
+
+## How a coding agent finds its way (the discovery chain)
+
+Every scaffolded project carries three layers of agent context, each pointing deeper:
+
+1. **CLAUDE.md / AGENTS.md** at the root — your agent's native file has the full
+   instructions, the other is a pointer (`--agent` picks which).
+2. **`.claude/skills/project-base/SKILL.md`** — the instantiated project skill: setup
+   workflow, ground rules, and a lessons section that grows with the repo.
+3. **`project.yaml`** — the single source of truth everything derives from.
+
+Status: v1 feature-complete — manifest ✅ · local mode ✅ · path-lint ✅ · doctor ✅ ·
+docker mode ✅. Next: publish prep (remote, demo screencasts).
 Demo screencasts (fresh-machine clone → running, both modes) land here when v1 ships.

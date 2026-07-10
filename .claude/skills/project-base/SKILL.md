@@ -19,6 +19,23 @@ repo and never syncs back — divergence is the design, not drift.
    LinkedIn reflection draft exists. Demo before polish.
 5. On session start: read the brain note pointer in CLAUDE.md for current project state.
 
+## initc knowledge (this repo BUILDS the tool; downstream repos USE it)
+
+- **CLI surface:** `initc init [--docker|--skip-install|--agent agents|claude]`,
+  `doctor`, `run <task>`, `env`, `lint-paths`, `validate`, `schema`. All anchor on the
+  nearest `project.yaml` (walking up, like git finds `.git`).
+- **Module map (src/init_configurator/):** `manifest.py` models+loader+teaching errors ·
+  `local_mode.py` scaffold+installs (never overwrites) · `presets/` starter files ·
+  `beacons.py` CLAUDE/AGENTS cross-pointers + downstream skill instantiation ·
+  `env_contract.py` .env.example · `path_lint.py`+`paths.py` linter + helpers ·
+  `doctor.py` three-state checks · `docker_mode.py` Dockerfile/compose · `cli.py` typer.
+- **Downstream discovery chain (how an agent in a cloned project finds its way):**
+  root beacon (CLAUDE.md or AGENTS.md) → instantiated `.claude/skills/project-base/SKILL.md`
+  → `project.yaml`. `initc init` writes all three; none are ever overwritten.
+- **When adding a capability:** update this skill section in the SAME phase as the code;
+  touch CLAUDE.md last and only when needed (its edits refresh Claude Code's prompt
+  cache — token cost). Dogfood every feature on this repo before calling it done.
+
 ## Teach-me protocol (optional; fires when Stepan says "I don't understand X" / "teach me X")
 
 Explain PROPERLY, not fast: (1) the concept from first principles, no jargon assumed;
@@ -34,3 +51,7 @@ repo unless he asks.
 - 2026-07-09 · Design-doc examples read as shipped defaults — label instance examples
   explicitly (Stepan's "abstract class" rule: this repo defines the format, never the
   filled-in values; stack-specific quality tools are opt-in add-ons, not defaults).
+- 2026-07-09 · Ship agent knowledge WITH the code: every new capability updates the
+  skill in the same phase; CLAUDE.md last (each edit re-caches the whole prompt).
+  Also: path-lint's first two catches were its own source and the Dockerfile template —
+  container paths are fine by definition, host paths are not.

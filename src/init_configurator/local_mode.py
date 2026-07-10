@@ -19,7 +19,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-from init_configurator.beacons import PrimaryChoice, context_beacons
+from init_configurator.beacons import PrimaryChoice, context_beacons, project_skill
 from init_configurator.env_contract import write_env_example
 from init_configurator.manifest import Manifest, Stack
 from init_configurator.presets import scaffold_files
@@ -49,10 +49,12 @@ def initialize(
 ) -> list[str]:
     """Run local mode against ``root`` and return human-readable report lines."""
     files = plan_files(manifest, pnpm_version=_pnpm_version())
-    # Beacons join the same never-overwrite plan; the primary/pointer choice is
-    # an init-time decision, so they aren't part of pure plan_files().
+    # Beacons and the project skill join the same never-overwrite plan; the
+    # primary/pointer choice is an init-time decision, so they aren't part of
+    # pure plan_files().
     files.update(context_beacons(manifest, agent))
-    report = _write_missing(root, files)
+    files.update(project_skill(manifest))
+    report = write_missing(root, files)
 
     env_example = write_env_example(manifest, root)
     if env_example is not None:
@@ -85,8 +87,12 @@ def plan_files(manifest: Manifest, *, pnpm_version: str | None = None) -> dict[s
     return files
 
 
-def _write_missing(root: Path, files: dict[str, str]) -> list[str]:
-    """Write the planned files that don't exist yet; report both outcomes."""
+def write_missing(root: Path, files: dict[str, str]) -> list[str]:
+    """Write the planned files that don't exist yet; report both outcomes.
+
+    Public because docker mode routes its generated files through the same
+    never-overwrite rule.
+    """
     report: list[str] = []
     for relpath, content in files.items():
         target = root / relpath
