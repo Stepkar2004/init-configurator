@@ -22,7 +22,7 @@ from pathlib import Path
 from init_configurator.beacons import PrimaryChoice, context_beacons, project_skill
 from init_configurator.env_contract import write_env_example
 from init_configurator.manifest import Manifest, Stack
-from init_configurator.presets import scaffold_files
+from init_configurator.presets import root_files, scaffold_files
 
 GITKEEP = "# Keeps this declared-but-empty directory in git.\n"
 
@@ -82,6 +82,10 @@ def plan_files(manifest: Manifest, *, pnpm_version: str | None = None) -> dict[s
         for relpath, content in scaffold_files(stack, manifest, pnpm_version=pnpm_version).items():
             prefix = "" if stack.root == "." else f"{stack.root.rstrip('/')}/"
             files[f"{prefix}{relpath}"] = content
+    # Root files fill gaps only: a stack rooted at "." already wrote its own
+    # README and .gitignore there, and that version wins.
+    for relpath, content in root_files(manifest).items():
+        files.setdefault(relpath, content)
     for directory in manifest.paths.values():
         files[f"{directory.rstrip('/')}/.gitkeep"] = GITKEEP
     return files

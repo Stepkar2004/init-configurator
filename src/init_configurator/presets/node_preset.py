@@ -8,6 +8,7 @@ phase, never forced.
 import json
 
 from init_configurator.manifest import Manifest, Stack
+from init_configurator.presets.common import stack_readme
 
 GITIGNORE = """\
 # Dependencies live INSIDE the project but never in git.
@@ -43,6 +44,7 @@ def files(stack: Stack, manifest: Manifest, *, pnpm_version: str | None = None) 
         "src/index.ts": INDEX_TS,
         "tests/index.test.ts": INDEX_TEST_TS,
         ".gitignore": GITIGNORE,
+        "README.md": stack_readme(manifest, stack),
     }
 
 

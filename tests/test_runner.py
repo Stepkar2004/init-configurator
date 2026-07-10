@@ -4,46 +4,28 @@ from pathlib import Path
 
 import pytest
 
-from init_configurator.manifest import Manifest, ManifestError
+from init_configurator.manifest import ManifestError
 from init_configurator.runner import find_task, run_task
-
-
-def build_manifest(stacks: list[dict[str, object]]) -> Manifest:
-    return Manifest.model_validate(
-        {"schema_version": 1, "project": {"name": "demo"}, "stacks": stacks}
-    )
-
-
-PY_STACK: dict[str, object] = {
-    "name": "api",
-    "language": "python",
-    "version": "3.12",
-    "package_manager": "uv",
-    "dependency_files": ["pyproject.toml"],
-    "tasks": {"test": "uv run pytest"},
-}
-NODE_STACK: dict[str, object] = {
-    "name": "web",
-    "language": "node",
-    "version": "24",
-    "package_manager": "pnpm",
-    "dependency_files": ["package.json"],
-    "tasks": {"test": "pnpm test"},
-}
+from tests.conftest import ManifestFactory, StackFactory
 
 
 class TestFindTask:
-    def test_unknown_task_lists_what_exists(self) -> None:
-        with pytest.raises(ManifestError, match="available: api:test"):
-            find_task(build_manifest([PY_STACK]), "deploy")
+    def test_unknown_task_lists_what_exists(self, build_manifest: ManifestFactory) -> None:
+        with pytest.raises(ManifestError, match="available: api:start, api:test"):
+            find_task(build_manifest(), "deploy")
 
-    def test_ambiguous_task_suggests_stack_flag(self) -> None:
+    def test_ambiguous_task_suggests_stack_flag(
+        self, build_manifest: ManifestFactory, python_stack: StackFactory, node_stack: StackFactory
+    ) -> None:
+        manifest = build_manifest(stacks=[python_stack(), node_stack()])
         with pytest.raises(ManifestError, match="--stack"):
-            find_task(build_manifest([PY_STACK, NODE_STACK]), "test")
+            find_task(manifest, "test")
 
-    def test_stack_flag_disambiguates(self) -> None:
-        stack = find_task(build_manifest([PY_STACK, NODE_STACK]), "test", stack_name="web")
-        assert stack.name == "web"
+    def test_stack_flag_disambiguates(
+        self, build_manifest: ManifestFactory, python_stack: StackFactory, node_stack: StackFactory
+    ) -> None:
+        manifest = build_manifest(stacks=[python_stack(), node_stack()])
+        assert find_task(manifest, "test", stack_name="web").name == "web"
 
 
 class TestRunTask:

@@ -6,6 +6,7 @@ a scaffold-time choice in a later phase, never forced (see docs/design/manifest-
 """
 
 from init_configurator.manifest import Manifest, Stack
+from init_configurator.presets.common import stack_readme
 
 PYPROJECT_TEMPLATE = """\
 [project]
@@ -80,6 +81,8 @@ def files(stack: Stack, manifest: Manifest) -> dict[str, str]:
             "    assert __version__\n"
         ),
         ".gitignore": GITIGNORE,
+        # pyproject's `readme =` points here: hatchling fails the build without it.
+        "README.md": stack_readme(manifest, stack),
     }
     # Ensure every dependency file the manifest declares actually exists.
     for dependency_file in stack.dependency_files:

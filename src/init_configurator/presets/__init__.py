@@ -9,6 +9,9 @@ overwritten.
 
 from init_configurator.manifest import Manifest, Stack
 from init_configurator.presets import node_preset, python_preset
+from init_configurator.presets.common import root_files
+
+__all__ = ["root_files", "scaffold_files"]
 
 
 def scaffold_files(
