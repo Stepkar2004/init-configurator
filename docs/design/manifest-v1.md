@@ -85,6 +85,11 @@ path_lint:
 docker:
   compose: true
   services: [postgres:16]     # sidecar containers added to compose
+
+# Optional: silence named doctor checks this repo deliberately deviates from
+# (expo-doctor pattern; every check prints its name in doctor output).
+doctor:
+  disable: []
 ```
 
 ## Decisions and why (research-backed)

@@ -138,6 +138,17 @@ class DockerConfig(StrictModel):
     services: list[str] = []
 
 
+class DoctorConfig(StrictModel):
+    """The ``doctor:`` section — per-repo tuning of doctor checks.
+
+    Every doctor check has a name (printed in its output line); a repo that
+    deliberately deviates lists those names here instead of ignoring the whole
+    report — the expo-doctor lesson.
+    """
+
+    disable: list[str] = []
+
+
 class Manifest(StrictModel):
     """The whole ``project.yaml`` file."""
 
@@ -149,6 +160,7 @@ class Manifest(StrictModel):
     requires: list[Requirement] = []
     path_lint: PathLint = PathLint()
     docker: DockerConfig | None = None
+    doctor: DoctorConfig = DoctorConfig()
 
     @field_validator("schema_version")
     @classmethod

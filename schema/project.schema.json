@@ -21,6 +21,22 @@
       "title": "DockerConfig",
       "type": "object"
     },
+    "DoctorConfig": {
+      "additionalProperties": false,
+      "description": "The ``doctor:`` section \u2014 per-repo tuning of doctor checks.\n\nEvery doctor check has a name (printed in its output line); a repo that\ndeliberately deviates lists those names here instead of ignoring the whole\nreport \u2014 the expo-doctor lesson.",
+      "properties": {
+        "disable": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Disable",
+          "type": "array"
+        }
+      },
+      "title": "DoctorConfig",
+      "type": "object"
+    },
     "EnvVar": {
       "additionalProperties": false,
       "description": "One entry of the ``env:`` contract.\n\nDoctor checks these against the real environment / ``.env``, and\n``initc env`` templates ``.env.example`` from them. Entries may not\nreference each other \u2014 declarations stay order-independent.",
@@ -246,6 +262,12 @@
         }
       ],
       "default": null
+    },
+    "doctor": {
+      "$ref": "#/$defs/DoctorConfig",
+      "default": {
+        "disable": []
+      }
     }
   },
   "required": [

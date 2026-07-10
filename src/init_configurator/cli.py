@@ -1,8 +1,8 @@
 """The ``initc`` command-line interface.
 
 Implemented: ``init`` (local mode), ``run``, ``env``, ``lint-paths``,
-``validate``, ``schema``. Still to land, in build order: ``doctor``, then
-docker mode (see docs/design/manifest-v1.md for the roadmap).
+``doctor``, ``validate``, ``schema``. Still to land: docker mode
+(see docs/design/manifest-v1.md for the roadmap).
 """
 
 from __future__ import annotations
@@ -15,6 +15,7 @@ import typer
 
 from init_configurator import local_mode
 from init_configurator.beacons import PrimaryChoice
+from init_configurator.doctor import format_results, has_failures, run_doctor
 from init_configurator.env_contract import write_env_example
 from init_configurator.manifest import Manifest, ManifestError, find_manifest, load_manifest
 from init_configurator.path_lint import scan_project
@@ -108,6 +109,22 @@ def env() -> None:
         typer.echo("no env vars declared in project.yaml — nothing to generate")
     else:
         typer.echo(f"wrote {written.name} ({len(manifest.env)} vars)")
+
+
+@app.command()
+def doctor() -> None:
+    """Check binaries, versions, files, and the env contract; fail before setup does."""
+    try:
+        manifest_path = find_manifest()
+        manifest = load_manifest(manifest_path)
+    except ManifestError as exc:
+        raise _fail(exc) from exc
+
+    results = run_doctor(manifest, manifest_path.parent)
+    for line in format_results(results):
+        typer.echo(line)
+    if has_failures(results):
+        raise typer.Exit(code=1)
 
 
 @app.command(name="lint-paths")
