@@ -1,0 +1,26 @@
+# This repo's own manifest — init-configurator dogfoods its own format.
+# Note how little a real instance needs: the format allows more (env, paths,
+# requires, docker), this project just doesn't need them.
+schema_version: 1
+
+project:
+  name: init-configurator
+  description: Clone-and-run project setup driven by one project.yaml.
+
+stacks:
+  - name: cli
+    language: python
+    version: "3.12"
+    root: .
+    package_manager: uv
+    dependency_files: [pyproject.toml]
+    tasks:
+      test: uv run pytest
+      lint: uv run ruff check src tests
+      typecheck: uv run mypy src
+
+path_lint:
+  include: ["**/*.py", "**/*.md", "**/*.yaml", "**/*.toml"]
+  # CLAUDE.md intentionally points at a machine-local brain note — the one
+  # allowed absolute path in this repo.
+  exclude: [".venv/", ".git/", "CLAUDE.md"]

@@ -1,0 +1,258 @@
+{
+  "$defs": {
+    "DockerConfig": {
+      "additionalProperties": false,
+      "description": "The ``docker:`` section \u2014 read only in ``--docker`` mode.",
+      "properties": {
+        "compose": {
+          "default": true,
+          "title": "Compose",
+          "type": "boolean"
+        },
+        "services": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Services",
+          "type": "array"
+        }
+      },
+      "title": "DockerConfig",
+      "type": "object"
+    },
+    "EnvVar": {
+      "additionalProperties": false,
+      "description": "One entry of the ``env:`` contract.\n\nDoctor checks these against the real environment / ``.env``, and\n``initc env`` templates ``.env.example`` from them. Entries may not\nreference each other \u2014 declarations stay order-independent.",
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "required": {
+          "default": true,
+          "title": "Required",
+          "type": "boolean"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "example": {
+          "default": "",
+          "title": "Example",
+          "type": "string"
+        },
+        "secret": {
+          "default": false,
+          "title": "Secret",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "EnvVar",
+      "type": "object"
+    },
+    "PathLint": {
+      "additionalProperties": false,
+      "description": "Config for the absolute-path linter (``path_lint:`` section).",
+      "properties": {
+        "include": {
+          "default": [
+            "**/*"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Include",
+          "type": "array"
+        },
+        "exclude": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Exclude",
+          "type": "array"
+        }
+      },
+      "title": "PathLint",
+      "type": "object"
+    },
+    "ProjectInfo": {
+      "additionalProperties": false,
+      "description": "The ``project:`` section \u2014 identity used in generated files.",
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "ProjectInfo",
+      "type": "object"
+    },
+    "Requirement": {
+      "additionalProperties": false,
+      "description": "An extra binary doctor must find (``requires:`` list).\n\n``reason`` is mandatory so \"ffmpeg missing\" always comes with a why.",
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "reason"
+      ],
+      "title": "Requirement",
+      "type": "object"
+    },
+    "Stack": {
+      "additionalProperties": false,
+      "description": "One language/runtime in the repo (the ``stacks:`` list).\n\nSingle-language repos have exactly one stack; a py-backend + node-frontend\nrepo has two.",
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "language": {
+          "enum": [
+            "python",
+            "node"
+          ],
+          "title": "Language",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        },
+        "root": {
+          "default": ".",
+          "title": "Root",
+          "type": "string"
+        },
+        "package_manager": {
+          "title": "Package Manager",
+          "type": "string"
+        },
+        "dependency_files": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Dependency Files",
+          "type": "array"
+        },
+        "tasks": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "title": "Tasks",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "language",
+        "version",
+        "package_manager",
+        "dependency_files"
+      ],
+      "title": "Stack",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The whole ``project.yaml`` file.",
+  "properties": {
+    "schema_version": {
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "project": {
+      "$ref": "#/$defs/ProjectInfo"
+    },
+    "stacks": {
+      "items": {
+        "$ref": "#/$defs/Stack"
+      },
+      "minItems": 1,
+      "title": "Stacks",
+      "type": "array"
+    },
+    "env": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/EnvVar"
+      },
+      "title": "Env",
+      "type": "array"
+    },
+    "paths": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {},
+      "title": "Paths",
+      "type": "object"
+    },
+    "requires": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Requirement"
+      },
+      "title": "Requires",
+      "type": "array"
+    },
+    "path_lint": {
+      "$ref": "#/$defs/PathLint",
+      "default": {
+        "include": [
+          "**/*"
+        ],
+        "exclude": []
+      }
+    },
+    "docker": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DockerConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "schema_version",
+    "project",
+    "stacks"
+  ],
+  "title": "Manifest",
+  "type": "object"
+}

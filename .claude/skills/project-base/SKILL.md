@@ -31,3 +31,6 @@ repo unless he asks.
 ## Lessons (append one line per real session: date · lesson; prune when stale)
 
 <!-- self-evolution starts here -->
+- 2026-07-09 · Design-doc examples read as shipped defaults — label instance examples
+  explicitly (Stepan's "abstract class" rule: this repo defines the format, never the
+  filled-in values; stack-specific quality tools are opt-in add-ons, not defaults).
