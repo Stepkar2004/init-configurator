@@ -24,6 +24,16 @@ GENERATED_HEADER = (
     "# init never overwrites an existing file, so your changes stick.\n"
 )
 
+# What compose cannot infer from the manifest, said out loud instead of guessed.
+COMPOSE_HINTS = (
+    "#\n"
+    '# Ports are yours to choose: add e.g. `ports: ["8000:8000"]` to a service.\n'
+    "# A start task must bind 0.0.0.0 inside a container - a task that binds\n"
+    "# localhost is reachable from nowhere but the container itself.\n"
+    "# The postgres password below defaults to 'postgres' for local development.\n"
+    "# Set POSTGRES_PASSWORD in .env before this leaves your machine.\n"
+)
+
 DOCKERIGNORE = """\
 .git
 .venv
@@ -32,6 +42,10 @@ __pycache__
 dist
 .env
 """
+
+# Container paths, not host paths: they exist inside the image, on every machine.
+PGDATA = "/var/lib/postgresql/data"  # path-lint: ignore
+PGDATA_VOLUME = "pgdata"
 
 
 def initialize(manifest: Manifest, root: Path, *, agent: PrimaryChoice = "agents") -> list[str]:
@@ -43,10 +57,13 @@ def initialize(manifest: Manifest, root: Path, *, agent: PrimaryChoice = "agents
 
 def docker_files(manifest: Manifest) -> dict[str, str]:
     """Everything docker mode MAY create, keyed by root-relative path."""
-    files: dict[str, str] = {".dockerignore": DOCKERIGNORE}
+    files: dict[str, str] = {}
     for stack in manifest.stacks:
         prefix = "" if stack.root == "." else f"{stack.root.rstrip('/')}/"
         files[f"{prefix}Dockerfile"] = _dockerfile(stack)
+        # One .dockerignore per stack, not one at the repo root: docker reads it
+        # only from the build context root, and each stack's root IS its context.
+        files[f"{prefix}.dockerignore"] = DOCKERIGNORE
     config = manifest.docker or DockerConfig()
     if config.compose:
         files["compose.yaml"] = _compose(manifest, config)
@@ -72,12 +89,45 @@ def _cmd_line(stack: Stack) -> str:
 
 
 def _compose(manifest: Manifest, config: DockerConfig) -> str:
+    """One service per stack, one per declared sidecar, wired so `up` works."""
+    sidecars = {_service_name(image): image for image in config.services}
+
     services: dict[str, dict[str, object]] = {}
     for stack in manifest.stacks:
         service: dict[str, object] = {"build": {"context": stack.root}}
         if manifest.env:
             service["env_file"] = [".env"]
+        if sidecars:
+            service["depends_on"] = sorted(sidecars)
         services[stack.name] = service
-    for image in config.services:
-        services[image.split(":")[0]] = {"image": image}
-    return GENERATED_HEADER + yaml.safe_dump({"services": services}, sort_keys=False)
+
+    volumes: dict[str, None] = {}
+    for name, image in sidecars.items():
+        services[name], sidecar_volumes = _sidecar_service(name, image)
+        volumes.update(sidecar_volumes)
+
+    document: dict[str, object] = {"services": services}
+    if volumes:
+        document["volumes"] = volumes
+    return GENERATED_HEADER + COMPOSE_HINTS + yaml.safe_dump(document, sort_keys=False)
+
+
+def _service_name(image: str) -> str:
+    """`postgres:16` -> `postgres`; a registry path keeps only its last segment."""
+    return image.rsplit(":", 1)[0].split("/")[-1]
+
+
+def _sidecar_service(name: str, image: str) -> tuple[dict[str, object], dict[str, None]]:
+    """A sidecar service, plus any named volumes it needs declared at the top level.
+
+    Only images whose startup requirements we actually know get more than an
+    ``image:`` line. Postgres is the one that bites: the official image refuses
+    to start without a password, and without a volume its data dies with the
+    container.
+    """
+    service: dict[str, object] = {"image": image}
+    if name != "postgres":
+        return service, {}
+    service["environment"] = {"POSTGRES_PASSWORD": "${POSTGRES_PASSWORD:-postgres}"}
+    service["volumes"] = [f"{PGDATA_VOLUME}:{PGDATA}"]
+    return service, {PGDATA_VOLUME: None}

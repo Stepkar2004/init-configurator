@@ -66,7 +66,7 @@ env:
     required: false
     secret: true              # doctor never echoes its value; .env.example leaves it blank
 
-# Named data/asset dirs — created at init, exposed via the helper lib (paths.data).
+# Named data/asset dirs — created at init, exposed via the helper lib: path_to("data").
 paths:
   data: data/
   models: models/
@@ -108,41 +108,80 @@ doctor:
 
 ## What the scaffolder writes (per stack preset, NOT stored in manifest)
 
-Each preset has a small CORE (always written) and OPTIONAL add-ons (picked at init,
-default off — keeps the generic template lean):
+Each preset writes a small CORE, and nothing else. The add-ons listed under ROADMAP
+below are researched but **not implemented in v1** — none of them is written today.
 
-**Python preset — core:** uv (in-project `.venv`, `uv.lock`), `src/` layout, Ruff
-lint+format (`E,F,I,B,UP,SIM,N,RUF`), mypy `strict = true`, pytest + pytest-cov,
-pre-commit (ruff, ruff-format, hygiene hooks).
-**Python — optional:** bandit or Ruff `S` rules (security), interrogate (docstring
-coverage), pip-audit in CI only (network call — never in pre-commit).
+**Python preset (v1, shipped):** uv (in-project `.venv`, `uv.lock`) or pip, `src/`
+layout, `README.md`, Ruff lint+format (`E,F,I,B,UP,SIM,N,RUF`), mypy `strict = true`,
+pytest, `.gitignore`, a starter test.
 
-**Node/React preset — core:** pnpm pinned via corepack `packageManager` field (Node ≥25
-note: corepack no longer bundled — doctor checks it), Biome as base linter/formatter,
-tsconfig extends `@tsconfig/strictest`, Vitest + React Testing Library. React projects
-add a narrow-scope ESLint layer for React-only rules (`eslint-plugin-react-hooks`
-recommended preset — includes React Compiler diagnostics — + `eslint-plugin-jsx-a11y`).
-**Node — optional:** Playwright e2e, **knip** (dead exports/deps — ts-prune is
-deprecated), **dependency-cruiser** (architecture/import rules), **size-limit** bundle
-budget. Node 24 LTS pin (revisit Oct 2026 when Node 26 promotes).
+**Node preset (v1, shipped):** pnpm pinned via corepack's `packageManager` field —
+only when a real pnpm version is detected, since a made-up pin breaks installs (Node
+≥25 no longer bundles corepack, so doctor's fix line says to enable it) — Biome as
+base linter/formatter, tsconfig extends `@tsconfig/strictest`, Vitest, `README.md`,
+`.gitignore`, a starter test. Node 24 LTS pin (revisit Oct 2026 when Node 26 promotes).
+
+**Repo root (v1, shipped):** `README.md`, `.gitignore` (covers `.env`, which the
+generated compose loads), `.pre-commit-config.yaml` wiring `initc lint-paths`. A stack
+rooted at `.` keeps its own README/.gitignore instead.
+
+**Context beacons (v1, shipped):** CLAUDE.md + AGENTS.md cross-pointing (primary file
+per user's agent; the other is a one-line pointer), the instantiated `project-base`
+skill, generated `.env.example`, and the `paths:` dirs the manifest declares.
+
+### ROADMAP — researched, not implemented in v1
+
+- **`framework:` on a stack.** Today "React app" is inexpressible: a node stack
+  scaffolds a library skeleton whose tsconfig sets no `jsx` and no DOM lib. This is
+  the next real feature, and it threads through presets → docker → doctor.
+- **Python add-ons:** bandit or Ruff `S` rules (security), interrogate (docstring
+  coverage), pip-audit in CI only (it makes a network call — never in pre-commit).
+- **Node add-ons:** a narrow-scope ESLint layer for React-only rules
+  (`eslint-plugin-react-hooks` recommended preset — includes React Compiler
+  diagnostics — plus `eslint-plugin-jsx-a11y`), Playwright e2e, **knip** (dead
+  exports/deps — ts-prune is deprecated and archived), **dependency-cruiser**
+  (enforceable architecture/import rules), **size-limit** (CI bundle budget).
+- **Generated CI workflow.** The pre-commit hook is generated; the workflow is not,
+  because a downstream CI job has to be able to install init-configurator first.
+  Blocked on publishing this repo.
+- **`project_root()` for other languages.** The helper lib is Python-only, so for
+  Node/Go/Rust the constructive half of path-lint does not exist yet.
+
+Add-ons stay opt-in by design (the abstract-class rule above): the generic template
+must not force a security scanner or a bundle budget onto a project that never asked.
 
 **Hooks orchestration:** pre-commit (Python-based) is the single hook manager even in
 polyglot repos — init-configurator already guarantees Python exists, and one manager
 beats husky+pre-commit fighting over `.git/hooks`.
 
-**Context beacons:** CLAUDE.md + AGENTS.md cross-pointing (primary file per user's
-agent; the other is a one-line pointer), instantiated `project-base` skill, `docs/`
-and `tests/` dirs, generated `.env.example`, path-lint pre-commit hook + CI workflow.
-
 ## CLI surface (v1)
 
 ```
-initc init [--local|--docker]   # scaffold from project.yaml (or interactively create one)
-initc doctor                    # verify binaries/versions/env contract; pass/warn/fail
-initc run <task> [stack]        # run a manifest task from project root
+initc init [--docker] [--skip-install] [--agent agents|claude]
+                                # scaffold from project.yaml; local install is the default,
+                                # --docker generates Dockerfile/compose instead
+initc doctor                    # verify binaries/versions/env contract; ok/warn/fail
+initc run <task> [--stack NAME] # run a manifest task from anywhere in the tree
 initc env                       # (re)generate .env.example; diff against manifest
-initc lint-paths                # absolute-path scan (also a pre-commit hook)
+initc lint-paths [FILES...]     # absolute-path scan (also a pre-commit hook)
+initc validate [PATH]           # check a manifest and print what it declares
+initc schema [--out PATH]       # export the JSON Schema
 ```
+
+### Doctor check names
+
+Every check prints its name, and `doctor.disable` in the manifest takes those names.
+`<stack>` is a stack's `name`; `<pm>` its `package_manager`.
+
+| Name | Checks |
+|---|---|
+| `binary:<pm>` | the package manager is on PATH |
+| `runtime:<stack>` | the declared runtime exists and matches `version` (uv stacks warn, don't fail — uv fetches the interpreter) |
+| `deps:<stack>:<file>` | each declared dependency file exists |
+| `install:<stack>` | the in-project env (`.venv` / `node_modules`) exists — warn, not fail |
+| `requires:<name>` | an extra binary from `requires:` is on PATH |
+| `env:<VAR>` | a required env var is set (shell env or `.env`) |
+| `env-sync` | `.env.example` matches the manifest's env list, both directions |
 
 ## Build order (scope v1, approved 2026-07-09)
 

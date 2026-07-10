@@ -2,11 +2,11 @@
 
 Clone any project. Run one command. It works.
 
-- **Two install modes:** `--docker` (generated Dockerfile/compose) or `--local`
-  (everything inside the project folder — venv, local node_modules; zero global installs)
-- **path-lint:** pre-commit + CI check that rejects absolute paths — root-relative or it
-  doesn't merge
-- **`init doctor`:** tells you what's missing *before* setup fails, not during
+- **Two install modes:** local by default (everything inside the project folder — venv,
+  local node_modules; zero global installs), or `--docker` (generated Dockerfile/compose)
+- **path-lint:** a check that rejects absolute paths — root-relative or it doesn't merge.
+  Ships as a pre-commit hook, scaffolded into every project init touches
+- **`initc doctor`:** tells you what's missing *before* setup fails, not during
 - **`.env` contract:** required vars declared in the manifest, checked, templated
 
 ## The manifest
@@ -38,7 +38,7 @@ uv run initc init         # scaffold missing files + install everything in-proje
 uv run initc run test     # run a manifest task from anywhere in the tree
 uv run initc env          # (re)generate .env.example from the manifest
 uv run initc doctor       # what's missing, what's misconfigured, and how to fix it
-uv run initc lint-paths   # reject absolute paths (also a pre-commit hook + CI check)
+uv run initc lint-paths   # reject absolute paths (also a pre-commit hook)
 uv run initc validate     # checks the manifest, prints what it declares
 uv run initc schema       # exports the JSON Schema
 ```
@@ -84,8 +84,13 @@ Doctor: 3 ok, 1 warnings, 0 problems
 `initc init --docker` scaffolds the same starter files, skips local installs, and
 generates one Dockerfile per stack (dependency layer cached separately from source,
 CMD taken from the manifest's `start` task) plus a `compose.yaml` wiring your stacks
-and declared sidecars (`services: ["postgres:16"]`). Generated docker files follow the
-same rule as everything else: never overwritten, so hand edits stick.
+and declared sidecars (`services: ["postgres:16"]`). Each stack gets its own
+`.dockerignore`, because Docker reads that file only from the build context root.
+Sidecars come up first (`depends_on`), and a declared postgres arrives with the password
+its image demands plus a named volume, so the database outlives the container. Ports are
+yours to pick — compose can't guess them, so it says so instead of guessing. Generated
+docker files follow the same rule as everything else: never overwritten, so hand edits
+stick.
 
 ## How a coding agent finds its way (the discovery chain)
 
@@ -97,6 +102,14 @@ Every scaffolded project carries three layers of agent context, each pointing de
    workflow, ground rules, and a lessons section that grows with the repo.
 3. **`project.yaml`** — the single source of truth everything derives from.
 
+Adding a language is adding one object: a provider in `languages.LANGUAGES` carrying its
+runtime binary, install dir, package managers, starter files, install steps, and
+Dockerfile body. A test asserts the registry and the manifest can't disagree.
+
 Status: v1 feature-complete — manifest ✅ · local mode ✅ · path-lint ✅ · doctor ✅ ·
 docker mode ✅. Next: publish prep (remote, demo screencasts).
 Demo screencasts (fresh-machine clone → running, both modes) land here when v1 ships.
+
+## License
+
+[MIT](LICENSE) © Stepan Karapetiani

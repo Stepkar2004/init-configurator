@@ -103,7 +103,7 @@ def env() -> None:
         raise _fail(exc) from exc
     written = write_env_example(manifest, manifest_path.parent)
     if written is None:
-        typer.echo("no env vars declared in project.yaml — nothing to generate")
+        typer.echo("no env vars declared in project.yaml - nothing to generate")
     else:
         typer.echo(f"wrote {written.name} ({len(manifest.env)} vars)")
 

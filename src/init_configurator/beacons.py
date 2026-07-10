@@ -76,11 +76,15 @@ exists only so every coding agent finds its way there.
 
 
 def project_skill(manifest: Manifest) -> dict[str, str]:
-    """The instantiated project skill — the canonical template made concrete.
+    """The canonical downstream project skill — this function IS the template.
 
     Every project scaffolded by init-configurator gets its own copy; each copy
-    evolves with its repo (the lessons section) and never syncs back to the
-    template. Divergence is the design.
+    evolves with its repo (the lessons section) and never syncs back here.
+    Divergence is the design.
+
+    Not to be confused with init-configurator's own checked-in
+    ``.claude/skills/project-base/SKILL.md``, which is this repo's evolved copy
+    and is not what downstream repos receive.
     """
     tasks = ", ".join(sorted({name for stack in manifest.stacks for name in stack.tasks}))
     description = (
@@ -106,7 +110,9 @@ with this repo and never syncs back to the template — divergence is the design
 3. `initc run <task>` — run a declared task from anywhere in the tree
    (declared here: {tasks or "none yet"}).
 4. `initc env` — regenerate .env.example after changing the env contract.
-5. `initc lint-paths` — no absolute paths, ever (pre-commit + CI enforce it).
+5. `initc lint-paths` — no absolute paths, ever. `pre-commit install` wires it
+   into every commit via the generated `.pre-commit-config.yaml`; nothing
+   enforces it in CI until you add it to your workflow.
 
 ## Ground rules
 

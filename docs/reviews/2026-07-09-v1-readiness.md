@@ -1,5 +1,10 @@
 # v1 readiness review — 2026-07-09
 
+> **Status: adopted.** Items 1–7 of "Recommended order" landed in phase 6; the findings
+> below describe the code as it was *before* that work, and are kept as the record of why
+> it changed. Item 8 (the `framework:` axis) is deferred — see the ROADMAP section of
+> [manifest-v1.md](../design/manifest-v1.md).
+
 Scope: full review of docs, skills, folder layout, test organization, and the scaffold's
 readiness to self-adjust per language and framework. Findings were verified by running the
 CLI end-to-end against fresh throwaway projects, not by reading alone.

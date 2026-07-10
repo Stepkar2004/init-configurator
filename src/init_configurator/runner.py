@@ -28,11 +28,11 @@ def find_task(manifest: Manifest, task: str, stack_name: str | None = None) -> S
             f"{stack.name}:{name}" for stack in manifest.stacks for name in stack.tasks
         )
         listing = ", ".join(available) if available else "(none declared)"
-        raise ManifestError(f"no task '{task}' in project.yaml — available: {listing}")
+        raise ManifestError(f"no task '{task}' in project.yaml - available: {listing}")
     if len(candidates) > 1:
         names = ", ".join(stack.name for stack in candidates)
         raise ManifestError(
-            f"task '{task}' exists in several stacks ({names}) — "
+            f"task '{task}' exists in several stacks ({names}) - "
             f"pick one with: initc run {task} --stack <name>"
         )
     return candidates[0]

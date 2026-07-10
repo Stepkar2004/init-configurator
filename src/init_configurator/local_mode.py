@@ -116,13 +116,13 @@ def _run(step: InstallStep) -> None:
     binary = shutil.which(step.argv[0])
     if binary is None:
         raise SetupError(
-            f"'{step.argv[0]}' not found on PATH — install it first "
+            f"'{step.argv[0]}' not found on PATH - install it first "
             f"(needed for: {step.description})"
         )
     result = subprocess.run([binary, *step.argv[1:]], cwd=step.cwd)
     if result.returncode != 0:
         raise SetupError(
-            f"{step.description} failed with exit code {result.returncode} — "
+            f"{step.description} failed with exit code {result.returncode} - "
             f"see the output above for the package manager's own error"
         )
 

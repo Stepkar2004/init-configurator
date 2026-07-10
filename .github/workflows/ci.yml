@@ -7,7 +7,13 @@ on:
 
 jobs:
   checks:
-    runs-on: ubuntu-latest
+    # Development happens on Windows, deployment on Linux. local_mode has a
+    # sys.platform == "win32" branch, so a Linux-only matrix never runs it.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
@@ -15,10 +21,12 @@ jobs:
       - run: uv run ruff check src tests
       - run: uv run ruff format --check src tests
       - run: uv run mypy src
-      - run: uv run pytest
+      - run: uv run pytest --cov --cov-fail-under=90
       - run: uv run initc lint-paths
       - run: uv run initc validate
       # The published schema is generated from the pydantic model but committed
-      # by hand; this fails the build when the two drift apart.
+      # by hand; this fails the build when the two drift apart. Linux only:
+      # regenerating on Windows rewrites the file with CRLF and the diff is noise.
       - name: schema is up to date
+        if: runner.os == 'Linux'
         run: uv run initc schema && git diff --exit-code schema/

@@ -58,7 +58,7 @@ def _reject_absolute(value: str) -> str:
     )
     if is_absolute:
         raise ValueError(
-            f"'{value}' is an absolute path — manifest paths must be relative "
+            f"'{value}' is an absolute path - manifest paths must be relative "
             f"to the project root (the folder containing {MANIFEST_FILENAME})"
         )
     return value
@@ -100,7 +100,7 @@ class Stack(StrictModel):
         if self.package_manager not in allowed:
             raise ValueError(
                 f"package_manager '{self.package_manager}' is not supported for "
-                f"{self.language} — pick one of: {', '.join(allowed)}"
+                f"{self.language} - pick one of: {', '.join(allowed)}"
             )
         return self
 
@@ -175,7 +175,7 @@ class Manifest(StrictModel):
             supported = ", ".join(str(v) for v in sorted(SUPPORTED_SCHEMA_VERSIONS))
             raise ValueError(
                 f"schema_version {value} is not supported by this init-configurator "
-                f"(supported: {supported}) — upgrade the tool, or write the manifest "
+                f"(supported: {supported}) - upgrade the tool, or write the manifest "
                 f"against a supported version"
             )
         return value
@@ -218,7 +218,7 @@ def find_manifest(start: Path | None = None) -> Path:
         if candidate.is_file():
             return candidate
     raise ManifestError(
-        f"no {MANIFEST_FILENAME} found in {directory} or any parent folder — "
+        f"no {MANIFEST_FILENAME} found in {directory} or any parent folder - "
         f"run 'initc init' to create one, or cd into a project that has one"
     )
 
@@ -282,9 +282,9 @@ def _hint_for(problem: ErrorDetails) -> str | None:
     last = loc[-1] if loc else None
 
     if error_type == "extra_forbidden":
-        return "unknown key — likely a typo; compare against docs/design/manifest-v1.md"
+        return "unknown key - likely a typo; compare against docs/design/manifest-v1.md"
     if last == "version" and error_type == "string_type":
-        return 'YAML reads an unquoted 3.12 as a number — quote it: version: "3.12"'
+        return 'YAML reads an unquoted 3.12 as a number - quote it: version: "3.12"'
     if last == "env" and error_type == "list_type":
         return "env is a list of entries, each starting with '- name: VAR_NAME'"
     if last == "language":

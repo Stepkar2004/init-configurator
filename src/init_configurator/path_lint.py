@@ -61,7 +61,7 @@ class Finding:
 
     def __str__(self) -> str:
         return (
-            f"{self.relpath}:{self.line}: absolute path '{self.match}' — "
+            f"{self.relpath}:{self.line}: absolute path '{self.match}' - "
             f"resolve from the project root instead (project_root() helper), "
             f"or append '{MARKER}' if this line must show one"
         )

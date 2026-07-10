@@ -32,5 +32,5 @@ def path_to(name: str, start: Path | None = None) -> Path:
     manifest = load_manifest(manifest_path)
     if name not in manifest.paths:
         declared = ", ".join(sorted(manifest.paths)) or "(none declared)"
-        raise ManifestError(f"no path '{name}' declared in project.yaml — declared: {declared}")
+        raise ManifestError(f"no path '{name}' declared in project.yaml - declared: {declared}")
     return manifest_path.parent / manifest.paths[name]
