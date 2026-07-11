@@ -344,7 +344,7 @@ kept here so nobody has to rediscover them:
 7. **Self-entrenchment.** A self-evolving system with no immune response converges on its own
    errors. The diff review and the trust ladder are not ceremony. They are the mechanism.
 
-## The tree (as built, 2026-07-10)
+## The tree (as built, 2026-07-11 — post-absorb, spawn shipped)
 
 ```
 init-configurator/
@@ -354,32 +354,36 @@ init-configurator/
 ├── project.yaml                 this repo described, machine-checkably (dogfood)
 ├── pyproject.toml · uv.lock     the tool's own packaging + locked deps
 ├── .gitattributes               * text=auto eol=lf — git can't undo LF writes
-├── .gitignore
+├── .gitignore                   also keeps docs/posts/ (drafts) local
 ├── .pre-commit-config.yaml      this repo runs its own path-lint hook
 ├── .pre-commit-hooks.yaml       lets OTHER repos consume path-lint as a hook
 ├── .github/workflows/ci.yml     the gates in CI, both OSes, schema-drift check
-├── .claude/skills/              THE GENOME (layer 1+3: knowledge, thin bindings)
-│   ├── project-base/            binds every session: gates, conventions, module map
-│   ├── bootstrap/               phase 0: interview → official creator → describe → prove
-│   │   └── references/          python.md · node.md · react.md · docker.md · quality-tools.md
-│   ├── evolve/                  lesson → procedure → reviewed skill diff
-│   ├── skill-manager/           altitude, consolidation, thresholds, miss-log, decay
-│   ├── scale/                   the four moves; the five stress patterns; cold-start quiz
-│   ├── absorb/                  conjugation: absorb genes in, spawn genome out
-│   └── rot-check/               watch-the-gate-fail; stale-pin hunt; trust decay
-├── src/init_configurator/       THE TOOL (layer 2: deterministic, runs without AI)
+├── .claude/skills/              THE GENOME (consolidated 2026-07-11, absorbed from traffic-rl)
+│   ├── project-base/            binds every session HERE (repo-specific; not shipped)
+│   ├── workflow/                the SWE loop: orient → … → commit (never push) → reflect
+│   │   └── references/          scale.md · rot-check.md (lazy parts)
+│   ├── skill-manager/           lifecycle: nested-skill policy, cap, altitude, decay
+│   │   └── references/          evolve.md · absorb.md · authoring.md (lazy parts)
+│   └── bootstrap/               phase 0: genome check → interview → official creator → prove
+│       └── references/          python.md · node.md · react.md · docker.md · quality-tools.md
+├── src/init_configurator/       THE TOOL (deterministic, runs without AI)
 │   ├── manifest.py  doctor.py  runtimes.py  env_contract.py
 │   ├── path_lint.py  paths.py  runner.py  beacons.py  textfile.py
 │   ├── describe.py              read an existing repo → draft its project.yaml
-│   └── cli.py                   validate · doctor · env · run · lint-paths · schema ·
-│                                describe   (later: spawn · absorb)
+│   ├── spawn.py                 copy the genome into a target; additive, never overwrites
+│   ├── genome/                  the shipped genome (package data): skills/ mirror
+│   │                            (byte-identical to .claude/skills, test-enforced),
+│   │                            standards/ (_gitignore, _gitattributes), docs/ templates
+│   └── cli.py                   spawn · describe · validate · doctor · env · run ·
+│                                lint-paths · schema   (later: absorb)
 ├── schema/project.schema.json   generated, committed, CI-diffed
 ├── tests/                       flat, 1:1 with modules + conftest fixtures
 └── docs/
     ├── vision.md                human-owned WHY (only Stepan edits; awaiting him)
     ├── state/                   now.md · roadmap.md · log.md · miss-log.md (resumability)
-    ├── decisions/               ADRs (0001 = this amputation)
+    ├── decisions/               ADRs (0001 amputation · 0002 ship the genome)
     ├── design/                  agentic-base.md (this file) · manifest-v1.md
+    ├── posts/                   gitignored — drafts stay local
     ├── structure.md             every file explained in a line — the map
     └── reviews/                 the adversarial reviews — the record
 ```

@@ -12,6 +12,25 @@ human-reviewed diffs — improves.
 
 **Skills know HOW. Tools know WHETHER. `project.yaml` records WHAT.**
 
+## Start a project from this base
+
+One command, nothing installed globally:
+
+```
+uvx --from git+https://github.com/Stepkar2004/init-configurator initc spawn my-project
+```
+
+`spawn` copies the genome — the skills, the standards (`.gitattributes`,
+`.gitignore`), and the `docs/` templates — into the target, **additively: a file that
+already exists is reported and kept, never overwritten**, so it is safe on a repo that
+already has content. Then open the folder with your coding agent: the `bootstrap`
+skill takes it from there (interview → official scaffolder → `project.yaml` → proof by
+gates). To make the tool a permanent part of the project:
+
+```
+uv add --dev "init-configurator @ git+https://github.com/Stepkar2004/init-configurator"
+```
+
 This repo started life as a template scaffolder and was deliberately amputated: across
 two adversarial reviews ([docs/reviews/](docs/reviews/)), every defect lived in the
 generation layer and none in the verification layer. The full story and the design that
@@ -41,6 +60,7 @@ stacks:
 ## The tool
 
 ```
+uv run initc spawn <dir>  # copy the genome into a project; never overwrites
 uv run initc describe     # inspect an existing repo, draft its project.yaml
 uv run initc validate     # is the manifest well-formed? errors teach, not scold
 uv run initc doctor       # is this machine ready? every problem prints its fix
@@ -82,21 +102,27 @@ Lines that must SHOW an absolute path (docs, tests) append `path-lint: ignore`.
 
 ## The genome
 
-The skills are the part that evolves. Lessons become procedures through a
-human-reviewed diff (`evolve`); a manager skill owns consolidation and decay
-(`skill-manager`); staleness is hunted, not awaited (`rot-check`); and the whole genome
-can be passed to a new project (`spawn`) or extracted from any existing repo (`absorb`)
-— gates as selection pressure, diff review as immunity.
+The skills are the part that evolves — few top-level, the less-common procedures
+nested as lazy references. `workflow` runs the SWE loop (scale and rot-check load on
+demand); `skill-manager` owns the genome's lifecycle (evolve, absorb, and the skill
+authoring standards load on demand); `bootstrap` owns phase 0. Lessons become
+procedures through a human-reviewed diff; staleness is hunted, not awaited. The genome
+ships inside the package — `initc spawn` passes it down to a new project, and genes
+can be absorbed back from any repo — gates as selection pressure, diff review as
+immunity. Not hypothetical: the first child's improvements (including this skill
+layout and `spawn` itself) were absorbed back into the base within a day.
 
 How a coding agent finds its way in any managed repo: root beacon (CLAUDE.md/AGENTS.md)
 → the repo's own `project-base` skill → `project.yaml`.
 
 ## Status
 
-Fresh off the pivot (2026-07). The verification tool is hardened — 107 tests, ~94%
-coverage, every gate green in CI on both Ubuntu and Windows. The skills are young:
-distilled from this repo's own hard-won lessons, now being validated on their first
-real downstream project. Demo screencast lands here with that validation.
+Fresh off the pivot (2026-07). The verification tool is hardened — 120 tests, ~94%
+coverage, every gate green in CI on both Ubuntu and Windows. The genome passed its
+first real test: [traffic-rl](https://github.com/Stepkar2004/traffic-rl) went from an
+empty folder to green gates, pre-commit hooks, and CI in one evening — and what it
+learned came back as reviewed diffs (the consolidated skill layout and `initc spawn`
+itself both originated there).
 
 ## License
 

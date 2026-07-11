@@ -3,19 +3,21 @@
 > Updated at every chunk boundary (gates pass → this file + log.md → commit).
 > Cold start reads: `../vision.md` → this file → `roadmap.md`.
 
-**As of 2026-07-10:**
+**As of 2026-07-11 (first absorb done, spawn shipped, publishing):**
 
-The pivot to the agentic base is EXECUTED. The scaffolder (presets, local mode, docker
-mode, `initc init`) is amputated; the tool is verification-only
-(`validate · doctor · env · run · lint-paths · schema · describe`), the genome is in
-place (7 skills under `.claude/skills/`), and all gates are green.
+The genome survived its first real generation. traffic-rl (the first child) ran phase 0
+on it, evolved it — nested-skill consolidation, a `workflow` skill, authoring standards,
+never-push and posts conventions — and those genes were absorbed back here as reviewed
+diffs. The genome now ships inside the package: `initc spawn <dir>` copies it into any
+project, additive-only (roadmap step 3's spawn half, promoted after one proven by-hand
+run; ADR 0002). Skills here: `project-base`, `workflow`, `skill-manager`, `bootstrap` —
+the transferable three mirrored byte-identical in `src/init_configurator/genome/`
+(test-enforced).
 
-- `docs/vision.md` exists but is unfilled — waiting on Stepan.
-- The skills are structurally complete but young: their references carry facts verified
-  2026-07; none has yet evolved from real downstream use.
-- Nothing is published; no remote configured.
+- Published at github.com/Stepkar2004/init-configurator (2026-07-11).
+- `docs/vision.md` still unfilled — waiting on Stepan; the amputation review he owes is
+  now the pre-publish review of this whole state.
+- `initc absorb` as a command: still by hand, same promotion bar spawn had.
 
-**Next action:** roadmap step 1 — a first downstream project spawns FROM this genome
-(new repo, per the `absorb` skill's spawn procedure; work never happens in here). Its
-frictions come back as `evolve` diffs. Then remote + publish. Stepan still owes the
-amputation review (owns-every-line rule) and `vision.md`.
+**Next action:** rot-check pass #1 (roadmap step 4) once the publish settles, and keep
+absorbing whatever traffic-rl's implementation phases teach.

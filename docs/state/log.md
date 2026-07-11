@@ -2,6 +2,17 @@
 
 > One entry per chunk, newest first: date · what happened · what it proved or changed.
 
+- **2026-07-11 · First absorb + spawn shipped + published.** The first child (traffic-rl)
+  evolved the genome through real phase-0 use; its genes came back as reviewed diffs:
+  nested-skill consolidation (7 top-level → 4: workflow with scale/rot-check as
+  references, skill-manager with evolve/absorb/authoring as references), never-push and
+  posts conventions, Actions-pinning and `local`-group facts into python.md. The genome
+  now ships as package data with `initc spawn` (additive-only, never overwrites; ADR
+  0002) — verified end-to-end from an installed wheel. `.claude/skills` ↔ genome held
+  byte-identical by test. beacons downstream template carries the new conventions.
+  120 tests, ~94% coverage, gates green. Pushed public to
+  github.com/Stepkar2004/init-configurator.
+
 - **2026-07-10 · Publish prep staged.** Decision: the genome gets one real downstream
   validation (a project spawned from this base into its own repo) before publicizing.
   README gained an honest Status section; announcement draft staged locally

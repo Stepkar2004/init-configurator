@@ -8,10 +8,11 @@ On session start: read `G:\PythonProjects\_for_me\The Brain v2\knowledge\project
 `docs/vision.md` → `docs/state/now.md` → `docs/state/roadmap.md`.
 
 **Before acting, consult the skill index.** `project-base` binds every session — gates,
-conventions, module map. The others fire by shape: `bootstrap` (phase 0), `evolve`
-(a lesson landed), `skill-manager` (skill hygiene), `scale` (work outgrows one context),
-`absorb` (genes between projects), `rot-check` (staleness hunts). Working without a
-matching skill? Log one line in `docs/state/miss-log.md` first.
+conventions, module map. The others fire by shape: `bootstrap` (phase 0), `workflow`
+(any code written, changed, or resumed; its references cover scale + rot-check),
+`skill-manager` (skill hygiene, a lesson landing, genes between projects; its references
+cover evolve + absorb + authoring). Working without a matching skill? Log one line in
+`docs/state/miss-log.md` first.
 
 **The line:** skills know HOW, tools know WHETHER, `project.yaml` records WHAT. Never
 move knowledge from markdown into code constants. Design record:
