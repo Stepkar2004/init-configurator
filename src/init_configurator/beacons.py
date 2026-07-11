@@ -101,8 +101,9 @@ description: {description}
 
 Instantiated from init-configurator on {date.today().isoformat()}. This copy EVOLVES
 with this repo and never syncs back to the template — divergence is the design.
-A lesson worth keeping goes through the evolve skill: procedure, not anecdote,
-appended below as a reviewed diff.
+A lesson worth keeping goes through the evolve procedure
+(`skill-manager/references/evolve.md`): procedure, not anecdote, appended below
+as a reviewed diff.
 
 ## The setup workflow (everything derives from project.yaml)
 
@@ -127,6 +128,10 @@ appended below as a reviewed diff.
   project.yaml and re-run `initc env` — doctor's env-sync check fails on drift.
 - Generated files (.env.example) say so in their header — edit the manifest,
   not the artifact. Everything else is yours to edit.
+- Commit at chunk boundaries; NEVER push — the human pushes, or explicitly
+  says push. An unpushed mistake is free; a pushed one is not.
+- Post drafts live in `docs/posts/` (gitignored). No em dashes (U+2014) in
+  post text, ever: use commas, colons, or parentheses.
 
 ## Lessons (append one line per real session: date · lesson; prune when stale)
 

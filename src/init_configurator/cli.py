@@ -1,9 +1,10 @@
 """The ``initc`` command-line interface.
 
 The tool answers questions; it does not write your project. Surface:
-``validate``, ``doctor``, ``env``, ``run``, ``lint-paths``, ``schema``, and
-``describe`` (draft a manifest for an existing repo). Generation belongs to an
-agent guided by ``.claude/skills/`` -- see docs/design/agentic-base.md.
+``validate``, ``doctor``, ``env``, ``run``, ``lint-paths``, ``schema``,
+``describe`` (draft a manifest for an existing repo), and ``spawn`` (copy the
+packaged genome into a project, additively). Generation belongs to an agent
+guided by ``.claude/skills/`` -- see docs/design/agentic-base.md.
 """
 
 from __future__ import annotations
@@ -26,6 +27,7 @@ from init_configurator.manifest import (
 )
 from init_configurator.path_lint import scan_project
 from init_configurator.runner import run_task
+from init_configurator.spawn import SpawnError, spawn_genome
 from init_configurator.textfile import write_text_lf
 
 app = typer.Typer(
@@ -39,6 +41,9 @@ PathArgument = Annotated[
 ]
 DescribeArgument = Annotated[Path, typer.Argument(help="The repo to inspect.")]
 SchemaOutOption = Annotated[Path, typer.Option(help="Where to write the JSON Schema.")]
+SpawnArgument = Annotated[
+    Path, typer.Argument(help="The project folder to receive the genome (created if missing).")
+]
 
 
 def _fail(error: Exception) -> typer.Exit:
@@ -65,6 +70,24 @@ def describe(path: DescribeArgument = Path(".")) -> None:
     write_text_lf(target, draft)
     typer.echo(f"drafted {MANIFEST_FILENAME} from what {root.name}/ already contains")
     typer.echo("review every line (FILL_ME marks the gaps), then: initc validate")
+
+
+@app.command()
+def spawn(path: SpawnArgument = Path(".")) -> None:
+    """Copy the genome (skills, standards, docs templates) into a project; never overwrites."""
+    try:
+        results = spawn_genome(path)
+    except SpawnError as exc:
+        raise _fail(exc) from exc
+    for spawned in results:
+        marker = "added" if spawned.created else "kept "
+        typer.echo(f"  {marker} {spawned.target}")
+    added = sum(1 for spawned in results if spawned.created)
+    kept = len(results) - added
+    typer.echo(f"spawned the genome into {path}: {added} added, {kept} kept")
+    if kept:
+        typer.echo("kept files existed before and were not touched - merge by hand if wanted")
+    typer.echo("next: run the bootstrap skill (.claude/skills/bootstrap/SKILL.md)")
 
 
 @app.command()

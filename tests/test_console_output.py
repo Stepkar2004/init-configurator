@@ -32,6 +32,7 @@ PRINTING_MODULES = [
     "paths.py",
     "runner.py",
     "runtimes.py",
+    "spawn.py",
 ]
 
 

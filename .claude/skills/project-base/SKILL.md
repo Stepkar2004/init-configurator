@@ -54,10 +54,15 @@ The same turn any code first reads a new env var: declare it in `project.yaml`, 
 3. **No global installs.** Deps live in `./.venv`. This repo itself is never dockerized.
 4. **Ship visibly:** a milestone isn't done until README shows it (GIF/screenshot) and a
    LinkedIn reflection draft exists. Demo before polish.
-5. **A skill edit is a code change.** It ships as a human-reviewed diff — the `evolve`
-   skill owns the procedure. New learned claims are marked `raw (YYYY-MM)`; only Stepan
-   promotes them to validated.
-6. On session start: read the brain note pointer in CLAUDE.md for current project state.
+5. **A skill edit is a code change.** It ships as a human-reviewed diff — the evolve
+   procedure (`skill-manager/references/evolve.md`) owns it. New learned claims are
+   marked `raw (YYYY-MM)`; only Stepan promotes them to validated.
+6. **Commit at chunk boundaries; NEVER push.** Stepan pushes, or explicitly says push —
+   this repo is public; an unpushed mistake is free, a pushed one is not. (Absorbed from
+   traffic-rl, 2026-07.)
+7. **Posts.** Drafts live in `docs/posts/` (gitignored — drafts never ship to the public
+   repo). No em dashes (U+2014) in post text, ever: use commas, colons, or parentheses.
+8. On session start: read the brain note pointer in CLAUDE.md for current project state.
 
 ## Module map (src/init_configurator/, post-amputation 2026-07)
 
@@ -71,8 +76,10 @@ The same turn any code first reads a new env var: declare it in `project.yaml`, 
 | `runner.py` | run a declared task from anywhere in the tree |
 | `path_lint.py` / `paths.py` | forbid absolute paths / make relative ones effortless |
 | `beacons.py` | template source for downstream CLAUDE.md/AGENTS.md + project skill |
+| `spawn.py` | copy the packaged genome into a target repo (additive, never overwrites) |
+| `genome/` | the shipped genome (skills + standards + docs templates), package data |
 | `textfile.py` | every generated file is written LF, on every OS |
-| `cli.py` | `validate · doctor · env · run · lint-paths · schema · describe` |
+| `cli.py` | `validate · doctor · env · run · lint-paths · schema · describe · spawn` |
 
 There is no `init`, no presets/, no docker generation — deleted 2026-07-10 on purpose;
 installing is a declared task (`initc run install`). **Adding a language** = one entry in
@@ -103,3 +110,8 @@ NOTHING to the repo unless he asks.
   masked it. Move the test to where only the fix can satisfy it.
 - 2026-07-09 · Play back a concrete walkthrough before building from an abstract spec —
   four hours of scaffolder proved a one-line vision cannot gate a build.
+- 2026-07-11 · First absorb executed (traffic-rl → base): a child's consolidation became
+  the genome's shape — nested references over sibling skills (cap 10, prefer 5-7);
+  never-push and posts conventions absorbed; spawn promoted to a command after one
+  proven by-hand run. The shipped genome and `.claude/skills/` are held byte-identical
+  by a test — edit them together.

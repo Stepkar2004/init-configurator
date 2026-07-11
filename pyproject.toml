@@ -1,6 +1,6 @@
 [project]
 name = "init-configurator"
-version = "0.1.0"
+version = "0.2.0"
 description = "Deterministic ground truth for agent-built projects: one project.yaml drives doctor checks, task running, env contracts, and path linting."
 readme = "README.md"
 requires-python = ">=3.12"

@@ -41,3 +41,11 @@ class TestProjectSkill:
         content = project_skill(build_manifest())[SKILL_PATH]
         assert "env" in content and "project.yaml" in content
         assert "<!-- self-evolution starts here -->" in content
+
+    def test_skill_carries_the_absorbed_conventions(self, build_manifest: ManifestFactory) -> None:
+        """Never-push and the posts rules came back from the first child (2026-07)."""
+        content = project_skill(build_manifest())[SKILL_PATH]
+        assert "NEVER push" in content
+        assert "docs/posts/" in content
+        assert "em dashes" in content
+        assert "skill-manager/references/evolve.md" in content  # evolve's real home

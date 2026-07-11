@@ -1,0 +1,4 @@
+# Generated and hand-written text files are LF everywhere; git must not undo
+# that on checkout. Without this, a Windows clone gets CRLF working-tree copies
+# and formatters/CI diff-checks fail on files nobody edited.
+* text=auto eol=lf
