@@ -2,6 +2,12 @@
 
 > One entry per chunk, newest first: date · what happened · what it proved or changed.
 
+- **2026-07-11 · Rot-check finding #1: CI actions off deprecated Node 20.** Bumped
+  `actions/checkout@v4 → v7` (floating major tag exists) and `astral-sh/setup-uv@v5 →
+  v8.3.2` (exact pin — no floating v8 tag, the absorbed lesson applied). Both now run
+  Node 24. Also de-named the base to "the user" (a cloner is not the author; authorship
+  keeps the real name, spelling fixed to Karapetyan) and gave bootstrap an owner-identity
+  interview step. README leads with a summary now.
 - **2026-07-11 · First absorb + spawn shipped + published.** The first child (traffic-rl)
   evolved the genome through real phase-0 use; its genes came back as reviewed diffs:
   nested-skill consolidation (7 top-level → 4: workflow with scale/rot-check as
