@@ -17,7 +17,7 @@ from pathlib import Path
 from init_configurator.spawn import genome_root
 
 REPO_SKILLS = Path(__file__).resolve().parents[1] / ".claude" / "skills"
-SHIPPED_SKILLS = ("bootstrap", "skill-manager", "workflow")
+SHIPPED_SKILLS = ("bootstrap", "skill-manager", "socials", "workflow")
 
 
 def _relative_files(root: Path) -> dict[str, str]:

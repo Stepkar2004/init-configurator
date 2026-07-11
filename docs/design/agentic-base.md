@@ -364,6 +364,8 @@ init-configurator/
 │   │   └── references/          scale.md · rot-check.md (lazy parts)
 │   ├── skill-manager/           lifecycle: nested-skill policy, cap, altitude, decay
 │   │   └── references/          evolve.md · absorb.md · authoring.md (lazy parts)
+│   ├── socials/                 ship visibly: decide → optimize → draft → post (human posts)
+│   │   └── references/          linkedin.md · github.md · visuals.md (lazy parts)
 │   └── bootstrap/               phase 0: genome check → interview → official creator → prove
 │       └── references/          python.md · node.md · react.md · docker.md · quality-tools.md
 ├── src/init_configurator/       THE TOOL (deterministic, runs without AI)

@@ -96,16 +96,30 @@ dataset = path_to("data") / "raw.csv"     # named dirs declared under paths: in 
 
 Lines that must SHOW an absolute path (docs, tests) append `path-lint: ignore`.
 
-## The genome
+## The genome (SKILLS)
 
 The skills are the part that evolves — few top-level, the less-common procedures
-nested as lazy references. `workflow` runs the SWE loop (scale and rot-check load on
-demand); `skill-manager` owns the genome's lifecycle (evolve, absorb, and the skill
-authoring standards load on demand); `bootstrap` owns phase 0. Lessons become
-procedures through a human-reviewed diff; staleness is hunted, not awaited. The genome
-ships inside the package — `initc spawn` passes it down to a new project, and genes
-can be absorbed back from any repo — gates as selection pressure, diff review as
-immunity. Not hypothetical: the first child's improvements (including this skill layout
+nested as lazy references:
+
+- [**`bootstrap`**](.claude/skills/bootstrap/SKILL.md) — phase 0. Interview → official
+  scaffolder → `project.yaml` → proof by gates; per-ecosystem facts (Python, Docker,
+  CI, …) load on demand.
+- [**`workflow`**](.claude/skills/workflow/SKILL.md) — the everyday SWE loop: plan,
+  build, gate, commit. Scaling up and rot-checks (staleness is hunted, not awaited)
+  load on demand.
+- [**`skill-manager`**](.claude/skills/skill-manager/SKILL.md) — the genome's own
+  lifecycle: evolve a skill when a lesson lands, absorb genes from other repos, skill
+  authoring standards. Every skill edit is a human-reviewed diff.
+- [**`socials`**](.claude/skills/socials/SKILL.md) — shipping visibly: decide →
+  optimize → draft → post for any platform, with per-platform playbooks (LinkedIn
+  feed mechanics, GitHub discoverability, post visuals). The human always posts.
+- [**`project-base`**](.claude/skills/project-base/SKILL.md) — each repo's
+  constitution: conventions, gates, module map. Written fresh at bootstrap, then
+  evolves with its repo and never syncs back.
+
+The genome ships inside the package — `initc spawn` passes it down to a new project,
+and genes can be absorbed back from any repo — gates as selection pressure, diff review
+as immunity. Not hypothetical: the first child's improvements (including this skill layout
 and `spawn` itself) were absorbed back into the base within a day.
 
 How a coding agent finds its way in any managed repo: root beacon (CLAUDE.md/AGENTS.md)

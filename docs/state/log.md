@@ -2,6 +2,16 @@
 
 > One entry per chunk, newest first: date · what happened · what it proved or changed.
 
+- **2026-07-11 · The socials skill: ship-visibly gets its HOW.** Authored from a
+  four-source research pass run as parallel subagents: the longform-factory skill's
+  stage architecture (VideoCreator2), a live read of ~40 real LinkedIn posts
+  (fold verified at ~140-220 chars by screenshot), and two web sweeps (LinkedIn
+  algorithm 2025-26, GitHub discoverability). One top-level skill — decide → optimize →
+  draft → post, the human always posts — with lazy references: linkedin.md, github.md,
+  visuals.md. Dated facts separated from mechanism facts everywhere (platform knowledge
+  rots faster than code). Mirrored into the genome (now four shipped skills); README
+  genome section became per-skill bullets. Found in passing: the repo's GitHub topics
+  are EMPTY — the "why doesn't my repo show in search" answer.
 - **2026-07-11 · Rot-check finding #1: CI actions off deprecated Node 20.** Bumped
   `actions/checkout@v4 → v7` (floating major tag exists) and `astral-sh/setup-uv@v5 →
   v8.3.2` (exact pin — no floating v8 tag, the absorbed lesson applied). Both now run

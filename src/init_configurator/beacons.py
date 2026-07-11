@@ -131,7 +131,8 @@ as a reviewed diff.
 - Commit at chunk boundaries; NEVER push — the human pushes, or explicitly
   says push. An unpushed mistake is free; a pushed one is not.
 - Post drafts live in `docs/posts/` (gitignored). No em dashes (U+2014) in
-  post text, ever: use commas, colons, or parentheses.
+  post text, ever: use commas, colons, or parentheses. The `socials` skill owns
+  the posting workflow (decide -> optimize -> draft -> post; the human posts).
 
 ## Lessons (append one line per real session: date · lesson; prune when stale)
 

@@ -11,8 +11,9 @@ On session start: read `G:\PythonProjects\_for_me\The Brain v2\knowledge\project
 conventions, module map. The others fire by shape: `bootstrap` (phase 0), `workflow`
 (any code written, changed, or resumed; its references cover scale + rot-check),
 `skill-manager` (skill hygiene, a lesson landing, genes between projects; its references
-cover evolve + absorb + authoring). Working without a matching skill? Log one line in
-`docs/state/miss-log.md` first.
+cover evolve + absorb + authoring), `socials` (posting, launching, promoting, or making
+anything findable; its references cover LinkedIn + GitHub + visuals — the human always
+posts). Working without a matching skill? Log one line in `docs/state/miss-log.md` first.
 
 **The line:** skills know HOW, tools know WHETHER, `project.yaml` records WHAT. Never
 move knowledge from markdown into code constants. Design record:

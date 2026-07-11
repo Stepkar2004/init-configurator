@@ -26,7 +26,7 @@
 Skills are the evolving HOW; each is markdown an agent loads only when it triggers, and
 every edit to one is a human-reviewed diff. Consolidated 2026-07-11 (absorbed from
 traffic-rl): few top-level skills, less-common procedures nested as lazy references.
-The three transferable skills are mirrored byte-for-byte in the shipped genome
+The four transferable skills are mirrored byte-for-byte in the shipped genome
 (`src/init_configurator/genome/skills/`) — a test enforces it.
 
 | Skill | What it does |
@@ -39,6 +39,10 @@ The three transferable skills are mirrored byte-for-byte in the shipped genome
 | `skill-manager/references/evolve.md` | The one door for self-modification: lesson → procedure (not anecdote) → altitude → trust mark → reviewed diff. |
 | `skill-manager/references/absorb.md` | Conjugation: absorb genes from any repo (provenance + review); the judgment half of spawn (`initc spawn` is the mechanical half). |
 | `skill-manager/references/authoring.md` | Skill authoring standards (triggers, progressive disclosure, eval method) — embedded so the genome has no plugin dependency. |
+| `socials/SKILL.md` | Shipping visibly: decide → optimize → draft → post for any platform; the human always posts, drafts land paste-ready in `docs/posts/`. |
+| `socials/references/linkedin.md` | LinkedIn feed mechanics: the fold budget, hook formulas, link cost, media choice, dated-facts table (raw 2026-07). |
+| `socials/references/github.md` | Repo discoverability: search scans name+description+topics only; topics/description/preview checklist, off-repo levers. |
+| `socials/references/visuals.md` | Post visuals: asset decision table, AI image prompt package, capture rules, platform sizes. |
 | `bootstrap/SKILL.md` | Phase 0 of any project: genome check → interview → official creator → project.yaml → beacons → hooks → prove with gates. |
 | `bootstrap/references/python.md` | Python stack knowledge: uv-first creator, ruff/mypy/pytest baseline, pip's dependency-group traps, LF rule, Actions pinning, the `local` group pattern. |
 | `bootstrap/references/node.md` | Node/TS knowledge: pnpm/packageManager pinning, strictest tsconfig split, biome's two traps, corepack's death. |

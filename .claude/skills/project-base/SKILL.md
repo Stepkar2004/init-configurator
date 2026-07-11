@@ -53,7 +53,8 @@ The same turn any code first reads a new env var: declare it in `project.yaml`, 
    linter that enforces it. Use `project_root()` / `path_to()` in code.
 3. **No global installs.** Deps live in `./.venv`. This repo itself is never dockerized.
 4. **Ship visibly:** a milestone isn't done until README shows it (GIF/screenshot) and a
-   LinkedIn reflection draft exists. Demo before polish.
+   LinkedIn reflection draft exists. Demo before polish. The `socials` skill owns the
+   posting workflow (decide → optimize → draft → post).
 5. **A skill edit is a code change.** It ships as a human-reviewed diff — the evolve
    procedure (`skill-manager/references/evolve.md`) owns it. New learned claims are
    marked `raw (YYYY-MM)`; only the user promotes them to validated.
