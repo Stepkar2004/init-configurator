@@ -1,18 +1,18 @@
 # init-configurator
 
-An agentic project base: **skills lead the agent, deterministic tools ground it.**
+**An agentic project base: skills lead the agent, deterministic tools ground it.**
 
-One `project.yaml` per repo declares what the project IS — stacks, tasks, env contract,
-data paths. A small Python tool answers, with exit codes and no AI present, the
-questions that must never depend on anyone's memory: *is the manifest valid? can this
-machine work here? are the env vars set? did an absolute path sneak in?* Everything
-about *creating* the project lives in evolving skill files
-([.claude/skills/](.claude/skills/)) that a coding agent reads, follows, and — through
-human-reviewed diffs — improves.
+Start any project from a genome of evolving skills, then keep it honest with a small
+CLI that answers, with exit codes and no AI present, the questions that must never
+depend on anyone's memory.
 
-**Skills know HOW. Tools know WHETHER. `project.yaml` records WHAT.**
+- **Skills know HOW** — scaffolding, evolving, and maintaining a project live in
+  Markdown skill files a coding agent reads and improves through human-reviewed diffs.
+- **Tools know WHETHER** — `initc` checks the facts: is the manifest valid, can this
+  machine work here, are the env vars set, did an absolute path sneak in.
+- **`project.yaml` records WHAT** — one manifest per repo, the single source of truth.
 
-## Start a project from this base
+## Quickstart
 
 One command, nothing installed globally:
 
@@ -20,21 +20,17 @@ One command, nothing installed globally:
 uvx --from git+https://github.com/Stepkar2004/init-configurator initc spawn my-project
 ```
 
-`spawn` copies the genome — the skills, the standards (`.gitattributes`,
-`.gitignore`), and the `docs/` templates — into the target, **additively: a file that
-already exists is reported and kept, never overwritten**, so it is safe on a repo that
-already has content. Then open the folder with your coding agent: the `bootstrap`
-skill takes it from there (interview → official scaffolder → `project.yaml` → proof by
-gates). To make the tool a permanent part of the project:
+`spawn` copies the genome (skills, standards, `docs/` templates) into the target,
+**additively — a file that already exists is kept, never overwritten** — so it is safe
+on a repo that already has content. Open the folder with your coding agent and the
+`bootstrap` skill takes it from there: interview → official scaffolder → `project.yaml`
+→ proof by gates. To make the tool a permanent dev dependency of the project:
 
 ```
 uv add --dev "init-configurator @ git+https://github.com/Stepkar2004/init-configurator"
 ```
 
-This repo started life as a template scaffolder and was deliberately amputated: across
-two adversarial reviews ([docs/reviews/](docs/reviews/)), every defect lived in the
-generation layer and none in the verification layer. The full story and the design that
-replaced it: [docs/design/agentic-base.md](docs/design/agentic-base.md).
+---
 
 ## The manifest
 
@@ -70,9 +66,9 @@ uv run initc lint-paths   # reject absolute paths (also a pre-commit hook)
 uv run initc schema       # export the JSON Schema
 ```
 
-There is no `init`. Scaffolding is done by an agent running the
+There is no `init`: scaffolding is done by an agent running the
 [`bootstrap` skill](.claude/skills/bootstrap/SKILL.md) against official ecosystem
-creators (`uv init`, `create-vite`, …) — current at run time, never frozen in a
+creators (`uv init`, `create-vite`, …), current at run time and never frozen in a
 template. Installing is a declared task like any other: `initc run install`.
 
 doctor borrows from the best: three-state results like flutter doctor, a fix printed
@@ -109,11 +105,19 @@ authoring standards load on demand); `bootstrap` owns phase 0. Lessons become
 procedures through a human-reviewed diff; staleness is hunted, not awaited. The genome
 ships inside the package — `initc spawn` passes it down to a new project, and genes
 can be absorbed back from any repo — gates as selection pressure, diff review as
-immunity. Not hypothetical: the first child's improvements (including this skill
-layout and `spawn` itself) were absorbed back into the base within a day.
+immunity. Not hypothetical: the first child's improvements (including this skill layout
+and `spawn` itself) were absorbed back into the base within a day.
 
 How a coding agent finds its way in any managed repo: root beacon (CLAUDE.md/AGENTS.md)
 → the repo's own `project-base` skill → `project.yaml`.
+
+## Why it's shaped this way
+
+This repo started life as a template scaffolder and was deliberately amputated: across
+two adversarial reviews ([docs/reviews/](docs/reviews/)), every defect lived in the
+generation layer and none in the verification layer. Templates rot the moment you write
+them; deterministic checks do not. The full story and the design that replaced it:
+[docs/design/agentic-base.md](docs/design/agentic-base.md).
 
 ## Status
 
@@ -126,4 +130,4 @@ itself both originated there).
 
 ## License
 
-[MIT](LICENSE) © Stepan Karapetiani
+[MIT](LICENSE) © Stepan Karapetyan
