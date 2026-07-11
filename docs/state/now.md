@@ -15,8 +15,8 @@ the transferable three mirrored byte-identical in `src/init_configurator/genome/
 (test-enforced).
 
 - Published at github.com/Stepkar2004/init-configurator (2026-07-11).
-- `docs/vision.md` still unfilled — waiting on Stepan; the amputation review he owes is
-  now the pre-publish review of this whole state.
+- `docs/vision.md` still unfilled — waiting on the owner; the amputation review still
+  owed is now the pre-publish review of this whole state.
 - `initc absorb` as a command: still by hand, same promotion bar spawn had.
 
 **Next action:** rot-check pass #1 (roadmap step 4) once the publish settles, and keep

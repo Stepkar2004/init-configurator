@@ -20,4 +20,4 @@ move knowledge from markdown into code constants. Design record:
 
 Gates all green before any commit (list in `project-base`). A skill edit is a code
 change: reviewed diff, never silent. Public showcase repo — code quality is the product;
-Stepan owns every line.
+the user owns every line.

@@ -1,6 +1,6 @@
 ---
 name: project-base
-description: Binds EVERY session in init-configurator - the gates, conventions, module map, chunk discipline, and env rule. Read on every session start before any work in this repo; also fires when Stepan asks to be taught a concept.
+description: Binds EVERY session in init-configurator - the gates, conventions, module map, chunk discipline, and env rule. Read on every session start before any work in this repo; also fires when the user asks to be taught a concept.
 ---
 # project-base — init-configurator (this repo's own copy)
 
@@ -46,9 +46,9 @@ The same turn any code first reads a new env var: declare it in `project.yaml`, 
 
 ## Conventions (from TheBrain2 `knowledge/projects/job-first-pivot.md`)
 
-1. **Stepan owns every line.** AI drafts; nothing merges to main until he can explain the
-   change. If he approves fast without understanding, slow him down — that's the
-   argmech/VC2 debt lesson. Interviewers probe; the code must be HIS.
+1. **The user owns every line.** AI drafts; nothing merges to main until the user can
+   explain the change. If they approve fast without understanding, slow them down — the
+   code must be theirs.
 2. **Root-relative paths only.** No machine-absolute paths anywhere; this repo builds the
    linter that enforces it. Use `project_root()` / `path_to()` in code.
 3. **No global installs.** Deps live in `./.venv`. This repo itself is never dockerized.
@@ -56,8 +56,8 @@ The same turn any code first reads a new env var: declare it in `project.yaml`, 
    LinkedIn reflection draft exists. Demo before polish.
 5. **A skill edit is a code change.** It ships as a human-reviewed diff — the evolve
    procedure (`skill-manager/references/evolve.md`) owns it. New learned claims are
-   marked `raw (YYYY-MM)`; only Stepan promotes them to validated.
-6. **Commit at chunk boundaries; NEVER push.** Stepan pushes, or explicitly says push —
+   marked `raw (YYYY-MM)`; only the user promotes them to validated.
+6. **Commit at chunk boundaries; NEVER push.** The user pushes, or explicitly says push —
    this repo is public; an unpushed mistake is free, a pushed one is not. (Absorbed from
    traffic-rl, 2026-07.)
 7. **Posts.** Drafts live in `docs/posts/` (gitignored — drafts never ship to the public
@@ -86,19 +86,19 @@ installing is a declared task (`initc run install`). **Adding a language** = one
 `runtimes.RUNTIMES` + one member of `manifest.Language` + one reference file under
 `bootstrap/references/`. A test asserts registry and manifest agree.
 
-## Teach-me protocol (fires when Stepan says "I don't understand X" / "teach me X")
+## Teach-me protocol (fires when the user says "I don't understand X" / "teach me X")
 
 Explain PROPERLY, not fast: (1) the concept from first principles, no jargon assumed;
 (2) a minimal generic example; (3) the same idea as it appears in THIS repo's code;
 (4) common pitfalls/misconceptions; (5) check understanding with 1-2 questions back.
 For deep topics, suggest a fresh side session dedicated to teaching. Teaching writes
-NOTHING to the repo unless he asks.
+NOTHING to the repo unless the user asks.
 
 ## Lessons (append one line per real session: date · lesson-as-procedure; prune when stale)
 
 <!-- self-evolution starts here -->
 - 2026-07-09 · Design-doc examples read as shipped defaults — label instance examples
-  explicitly (Stepan's "abstract class" rule: this repo defines the format, never the
+  explicitly (the user's "abstract class" rule: this repo defines the format, never the
   filled-in values; stack-specific quality tools are opt-in add-ons, not defaults).
 - 2026-07-09 · Ship agent knowledge WITH the code: every new capability updates the
   skill in the same phase; CLAUDE.md last (each edit re-caches the whole prompt).

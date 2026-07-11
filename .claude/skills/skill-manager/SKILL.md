@@ -9,7 +9,7 @@ Somebody still has to see the whole genome: whether the pieces are at the right
 altitude, whether gaps and corpses are accumulating. That somebody is this skill, and
 the periodic pass runs with FRESH context — the writer of a skill never grades it.
 
-## Nested-skill architecture (policy, decided by Stepan 2026-07-11)
+## Nested-skill architecture (policy, decided 2026-07-11)
 
 - **Few top-level skills, lazy references inside.** A skill's body is the always-loaded
   front door; variants and less-common procedures live in `references/` files loaded

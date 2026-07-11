@@ -27,18 +27,24 @@ bootstrap works standalone.
 
 Ask only what changes the outcome:
 
-1. **Stack and version** — language(s), one stack per folder.
-2. **Package manager** — per stack (see the stack reference for the default and why).
-3. **Quality tools** — baseline linter/typechecker/test-runner is assumed; then offer
+1. **Owner identity** — the name and email for LICENSE, README, and package metadata.
+   Read it from `git config user.name` / `git config user.email` first and confirm;
+   only ask outright when they are unset. This is the ONE place a specific human's name
+   belongs — the skills and conventions stay generic ("the user"), so the base reads the
+   same for whoever clones it.
+2. **Stack and version** — language(s), one stack per folder.
+3. **Package manager** — per stack (see the stack reference for the default and why).
+4. **Quality tools** — baseline linter/typechecker/test-runner is assumed; then offer
    the opt-in menu from [references/quality-tools.md](references/quality-tools.md).
    A menu, never a default. If the user names a better tool you don't know, that is an
    `evolve` event: adopt it AND update the reference in the same session.
-4. **Docs shape** — mirrored `docs/` tree, or README-only.
-5. **Env vars known now** — anything the code will read goes into the contract today.
-6. **Primary agent file** — CLAUDE.md or AGENTS.md (the other becomes a pointer).
+5. **Docs shape** — mirrored `docs/` tree, or README-only.
+6. **Env vars known now** — anything the code will read goes into the contract today.
+7. **Primary agent file** — CLAUDE.md or AGENTS.md (the other becomes a pointer).
 
 The *choice* lands in `project.yaml` (machine-checkable); the *reason* lands in an ADR
-under `docs/decisions/` (readable next session).
+under `docs/decisions/` (readable next session). The owner identity lands in the stack's
+project metadata (e.g. `pyproject.toml` authors) and the LICENSE, nowhere else.
 
 ## Step 2 — scaffold with the official creator
 

@@ -97,7 +97,7 @@ Deterministic, runs with no AI present; answers WHETHER, never HOW.
 
 | Path | What it is |
 |---|---|
-| `vision.md` | The human-owned WHY — structure ready, content awaiting Stepan; only he edits it. |
+| `vision.md` | The human-owned WHY — structure ready, content awaiting the user; only they edit it. |
 | `state/now.md` | Where the project is right now; updated at every chunk boundary. |
 | `state/roadmap.md` | Ordered next chunks, derived from the vision. |
 | `state/log.md` | One entry per chunk, newest first — the project's memory of what happened. |

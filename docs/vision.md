@@ -1,6 +1,6 @@
 # Vision
 
-> **Human-owned. Only Stepan edits this file.** Everything downstream — the roadmap, the
+> **Human-owned. Only the user (the project owner) edits this file.** Everything downstream — the roadmap, the
 > chunks, the skills' priorities — derives from what is written here. If this file is
 > wrong, the system optimizes efficiently toward the wrong thing; nothing below it can
 > catch that. (Honest limit #1 in `design/agentic-base.md`.)

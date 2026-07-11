@@ -103,7 +103,7 @@ doctor:
 | `.env.example` is generated + diffed | dotenv-linter's `diff` pattern: doctor cross-checks manifest env list ↔ `.env.example` keys and flags drift both ways. |
 | doctor: pass/warn/fail + fix command per failure | flutter doctor's three-state checklist + brew doctor's "print the remediation, not just the diagnosis". Every check has a name and can be disabled per-repo (expo doctor pattern). Warning bar stays high — brew doctor's over-warning trains users to ignore it. |
 | `requires` needs a `reason` | When doctor says "ffmpeg missing", the user immediately knows why it's needed and whether they care. |
-| Tool itself is Python | Gemini's Go/Rust advice rejected: this is a Python portfolio, Stepan owns every line (skill rule 1), and the tool shells out to package managers — CLI speed is irrelevant. Python + uv + src layout, dogfooding its own conventions. |
+| Tool itself is Python | Gemini's Go/Rust advice rejected: this is a Python portfolio, the user owns every line (skill rule 1), and the tool shells out to package managers — CLI speed is irrelevant. Python + uv + src layout, dogfooding its own conventions. |
 
 ## What the scaffolder writes (per stack preset) — HISTORY, superseded 2026-07-10
 

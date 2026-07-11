@@ -29,7 +29,7 @@ description: The SWE loop binding every implementation session in this repo - fi
    plan doc, an ADR for any new decision (`docs/decisions/`), docstrings. The test:
    "would a fresh session mis-learn anything if it read the docs right now?"
 5. **Commit at the chunk boundary.** Gates green → `docs/state/now.md` + `log.md`
-   updated → commit. **NEVER push. Stepan pushes, or explicitly says push** — this repo
+   updated → commit. **NEVER push. The user pushes, or explicitly says push** — this repo
    is public; an unpushed mistake is free, a pushed one is not.
 6. **Reflect.** A lesson landed (root cause found, default overridden, mistake repeated)?
    → run the evolve procedure: `skill-manager/references/evolve.md`. Task matched no
@@ -37,7 +37,7 @@ description: The SWE loop binding every implementation session in this repo - fi
 
 ## When to stop and ask
 
-Stepan is available and asking is free: scope changes, tradeoffs with product impact,
+The user is available and asking is free: scope changes, tradeoffs with product impact,
 anything irreversible or public-facing, or two defensible designs with different
 long-term costs. Blocked beats wrong.
 

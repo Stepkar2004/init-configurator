@@ -379,7 +379,7 @@ init-configurator/
 ├── schema/project.schema.json   generated, committed, CI-diffed
 ├── tests/                       flat, 1:1 with modules + conftest fixtures
 └── docs/
-    ├── vision.md                human-owned WHY (only Stepan edits; awaiting him)
+    ├── vision.md                human-owned WHY (only the user edits; awaiting them)
     ├── state/                   now.md · roadmap.md · log.md · miss-log.md (resumability)
     ├── decisions/               ADRs (0001 amputation · 0002 ship the genome)
     ├── design/                  agentic-base.md (this file) · manifest-v1.md
