@@ -108,6 +108,7 @@ class TestSpawnCommand:
         assert result.exit_code == 0
         assert "added" in result.output
         assert "bootstrap" in result.output  # the discovery chain's next link
+        assert "project-base is bootstrap-managed" in result.output  # the name-collision footgun
         assert result.output.isascii()
 
     def test_spawn_reports_kept_without_failing(self, tmp_path: Path) -> None:
