@@ -154,7 +154,7 @@ them; deterministic checks do not. The full story and the design that replaced i
 
 ## Status
 
-Fresh off the pivot (2026-07). The verification tool is hardened — 125 tests, ~94%
+Fresh off the pivot (2026-07). The verification tool is hardened — 126 tests, ~94%
 coverage, every gate green in CI on both Ubuntu and Windows. The genome passed its
 first real test: [traffic-rl](https://github.com/Stepkar2004/traffic-rl) went from an
 empty folder to green gates, pre-commit hooks, and CI in one evening — and what it
