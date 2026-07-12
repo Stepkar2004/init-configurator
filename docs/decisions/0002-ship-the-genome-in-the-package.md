@@ -16,11 +16,18 @@ skill's rule was: promote spawn to a command once the by-hand shape is proven. I
   `src/init_configurator/genome/`: the three portable skills (`workflow`,
   `skill-manager`, `bootstrap` — with their references), the standards
   (`.gitattributes`, `.gitignore`), and the `docs/` templates (vision, state, posts).
-- **`initc spawn <path>` is additive-only.** A file that already exists is reported as
-  "kept" and never overwritten — same rule beacons always had. This is why the tool
-  needs no interview: it cannot destroy. WHETHER to install the genome into a repo that
-  already has one is a judgment call, so it lives in the bootstrap skill's interview
+- **`initc spawn <path>` is additive by default.** A file that already exists is
+  reported as "kept" and not overwritten — same rule beacons always had. This is why the
+  tool needs no interview: it cannot destroy. WHETHER to install the genome into a repo
+  that already has one is a judgment call, so it lives in the bootstrap skill's interview
   (step 0b), not in the tool.
+  - **Amended 2026-07-11 — `--force`:** an existing child that wants the base's newer
+    skills can pass `--force`, which overwrites existing files **under `.claude/skills/`
+    only**, still never deleting. Docs and standards stay additive so a filled-in
+    `vision.md` or a custom `.gitignore` is never clobbered — the value users accumulate
+    lives there, and losing it is the one destruction worth ruling out by construction.
+    "Cannot destroy" becomes "cannot destroy what you own, and never silently": `--force`
+    is opt-in and its every change shows in `git diff`.
 - **`project.yaml` and `project-base` are not in the genome.** They are per-project:
   `describe`/`bootstrap` write the manifest; `beacons.py` templates the project skill
   from it.

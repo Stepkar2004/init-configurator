@@ -1,11 +1,13 @@
 """Copy the packaged genome into a target project, additively.
 
 Spawn is the mechanical half of inheritance; the judgment half stays with the
-agent running the absorb skill's spawn procedure (review what was kept, record
-lineage, run bootstrap next). This module only ever ADDS files: a target file
-that already exists is reported as kept and never touched, so there is nothing
-to interview about at this layer -- the tool cannot destroy, and the agent
-decides whether merging genome content into kept files is wanted.
+agent running the absorb skill's spawn procedure (review what changed, record
+lineage, run bootstrap next). By default this module only ADDS files: a target
+file that already exists is reported as kept and never touched. ``force_skills``
+lets the base's version win for existing SKILL files only -- docs and standards
+stay additive so a filled-in template (a real vision.md, a custom .gitignore) is
+never clobbered -- and even then it only rewrites files the genome ships, never
+deleting anything the target added on its own.
 
 The genome ships inside the package (``init_configurator/genome/``):
 
@@ -26,6 +28,7 @@ from dataclasses import dataclass
 from importlib.resources import files
 from importlib.resources.abc import Traversable
 from pathlib import Path, PurePosixPath
+from typing import Literal
 
 from init_configurator.textfile import write_text_lf
 
@@ -36,8 +39,14 @@ _DESTINATIONS = {
     "docs": PurePosixPath("docs"),
 }
 
+#: only files under here are eligible for --force overwrite (see module docstring)
+_SKILLS_DEST = _DESTINATIONS["skills"]
+
 #: names that cannot exist verbatim inside the package (see module docstring)
 _RENAMES = {"_gitignore": ".gitignore", "_gitattributes": ".gitattributes"}
+
+#: what happened to one genome file in the target
+Outcome = Literal["added", "kept", "replaced"]
 
 
 class SpawnError(Exception):
@@ -46,10 +55,10 @@ class SpawnError(Exception):
 
 @dataclass(frozen=True)
 class SpawnedFile:
-    """One genome file's fate in the target: created, or kept as it was."""
+    """One genome file's fate in the target: added, kept as-is, or replaced."""
 
     target: PurePosixPath
-    created: bool
+    outcome: Outcome
 
 
 def genome_root() -> Traversable:
@@ -57,8 +66,12 @@ def genome_root() -> Traversable:
     return files("init_configurator").joinpath("genome")
 
 
-def spawn_genome(target_dir: Path) -> list[SpawnedFile]:
-    """Copy every genome file that is missing from ``target_dir``; skip the rest."""
+def spawn_genome(target_dir: Path, *, force_skills: bool = False) -> list[SpawnedFile]:
+    """Copy every missing genome file into ``target_dir``.
+
+    Existing files are kept, except that ``force_skills`` overwrites existing
+    files under ``.claude/skills/`` with the base's version when they differ.
+    """
     if target_dir.exists() and not target_dir.is_dir():
         raise SpawnError(
             f"{target_dir} is a file - spawn needs a project folder "
@@ -68,12 +81,25 @@ def spawn_genome(target_dir: Path) -> list[SpawnedFile]:
     for source, relative in sorted(_genome_files(), key=lambda pair: str(pair[1])):
         destination = target_dir / relative
         if destination.exists():
-            results.append(SpawnedFile(relative, created=False))
+            results.append(_reconcile(source, destination, relative, force_skills))
             continue
         destination.parent.mkdir(parents=True, exist_ok=True)
         write_text_lf(destination, source.read_text(encoding="utf-8"))
-        results.append(SpawnedFile(relative, created=True))
+        results.append(SpawnedFile(relative, "added"))
     return results
+
+
+def _reconcile(
+    source: Traversable, destination: Path, relative: PurePosixPath, force_skills: bool
+) -> SpawnedFile:
+    """Decide the fate of a genome file whose target already exists."""
+    if not (force_skills and relative.is_relative_to(_SKILLS_DEST)):
+        return SpawnedFile(relative, "kept")
+    incoming = source.read_text(encoding="utf-8")
+    if destination.read_text(encoding="utf-8") == incoming:
+        return SpawnedFile(relative, "kept")
+    write_text_lf(destination, incoming)
+    return SpawnedFile(relative, "replaced")
 
 
 def _genome_files() -> Iterator[tuple[Traversable, PurePosixPath]]:

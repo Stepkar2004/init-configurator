@@ -372,7 +372,7 @@ init-configurator/
 │   ├── manifest.py  doctor.py  runtimes.py  env_contract.py
 │   ├── path_lint.py  paths.py  runner.py  beacons.py  textfile.py
 │   ├── describe.py              read an existing repo → draft its project.yaml
-│   ├── spawn.py                 copy the genome into a target; additive, never overwrites
+│   ├── spawn.py                 copy the genome into a target; additive, --force updates skills
 │   ├── genome/                  the shipped genome (package data): skills/ mirror
 │   │                            (byte-identical to .claude/skills, test-enforced),
 │   │                            standards/ (_gitignore, _gitattributes), docs/ templates

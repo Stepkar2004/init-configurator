@@ -156,7 +156,7 @@ beats husky+pre-commit fighting over `.git/hooks`.
 ## CLI surface (post-pivot; `init` removed 2026-07-10, `spawn` added 2026-07-11)
 
 ```
-initc spawn [PATH]              # copy the packaged genome into a project; never overwrites
+initc spawn [PATH] [--force]    # copy the packaged genome in; additive, --force updates existing skills
 initc describe [PATH]           # inspect an existing repo, draft its project.yaml
 initc doctor                    # verify binaries/versions/env contract; ok/warn/fail
 initc run <task> [--stack NAME] # run a manifest task from anywhere in the tree

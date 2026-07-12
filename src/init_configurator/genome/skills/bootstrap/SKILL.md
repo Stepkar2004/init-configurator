@@ -18,10 +18,11 @@ design assumed the folder was empty; you must not.
 
 If `.claude/skills/` is missing the base skills (workflow, skill-manager, bootstrap),
 ask the user whether to install them: `initc spawn .` copies the packaged genome
-(skills, standards, docs templates) and is additive and idempotent — it NEVER
-overwrites; anything it reports as "kept" already existed and stays the user's. Merge
-genome content into kept files by hand only if the user asks. Declining is fine —
-bootstrap works standalone.
+(skills, standards, docs templates), additive and idempotent — anything it reports as
+"kept" already existed and stays the user's. (Refreshing an existing child later,
+`initc spawn . --force` updates existing skills to the base's version; docs and
+standards stay untouched.) Merge kept files by hand only if the user asks. Declining is
+fine — bootstrap works standalone.
 
 ## Step 1 — the interview (short, concrete, every answer recorded)
 

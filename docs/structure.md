@@ -66,7 +66,7 @@ Deterministic, runs with no AI present; answers WHETHER, never HOW.
 | `path_lint.py` | Rejects machine-absolute paths (the destructive half of the path story). |
 | `paths.py` | `project_root()` / `path_to()` — makes relative paths effortless (the constructive half). |
 | `beacons.py` | Template source for a downstream project's CLAUDE.md/AGENTS.md + project-base skill. |
-| `spawn.py` | Copies the packaged genome into a target project — additive only, never overwrites, reports what was kept. |
+| `spawn.py` | Copies the packaged genome into a target project — additive by default (reports what was kept); `--force` updates existing skill files only, never docs/standards, never deletes. |
 | `genome/` | The shipped genome as package data: `skills/` (mirror of the transferable skills), `standards/` (`_`-prefixed dotfiles), `docs/` templates. |
 | `textfile.py` | Every generated file is written LF explicitly, because `write_text` translates newlines. |
 | `cli.py` | The `initc` surface: `spawn · describe · validate · doctor · env · run · lint-paths · schema`. |
@@ -92,7 +92,7 @@ Deterministic, runs with no AI present; answers WHETHER, never HOW.
 | `test_env_contract.py` | .env.example rendering, secret blanking. |
 | `test_path_lint.py` | The absolute-path scanner and its ignore marker. |
 | `test_beacons.py` | The downstream templates speak the post-pivot CLI (no `initc init` can sneak back) and carry the absorbed conventions. |
-| `test_spawn.py` | The genome lands additively; existing files come through byte-identical; dotfiles get real names. |
+| `test_spawn.py` | The genome lands additively; existing files come through byte-identical; dotfiles get real names; `--force` replaces only diverged skills and spares docs/standards. |
 | `test_genome.py` | The shipped genome equals `.claude/skills/` byte-for-byte (drift is a failing gate); no project-base ships. |
 | `test_runner.py` | Task lookup, disambiguation, teaching errors. |
 | `test_console_output.py` | Everything printed to a terminal is ASCII (Windows cp1252 consoles). |

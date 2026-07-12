@@ -24,7 +24,19 @@ uvx --from git+https://github.com/Stepkar2004/init-configurator initc spawn my-p
 **additively — a file that already exists is kept, never overwritten** — so it is safe
 on a repo that already has content. Open the folder with your coding agent and the
 `bootstrap` skill takes it from there: interview → official scaffolder → `project.yaml`
-→ proof by gates. To make the tool a permanent dev dependency of the project:
+→ proof by gates.
+
+Re-run it later to pull in whatever the base has since gained. `uvx` caches the version
+it fetched, so add `--refresh` to fetch the current genome; add `--force` to let the
+base's version win for skills you have not changed. `--force` only ever rewrites skill
+files the base ships — your `docs/`, your standards, and any skills the base doesn't ship
+stay put, and `git diff` shows you exactly what moved:
+
+```
+uvx --refresh --from git+https://github.com/Stepkar2004/init-configurator initc spawn . --force
+```
+
+To make the tool a permanent dev dependency of the project:
 
 ```
 uv add --dev "init-configurator @ git+https://github.com/Stepkar2004/init-configurator"
@@ -32,31 +44,44 @@ uv add --dev "init-configurator @ git+https://github.com/Stepkar2004/init-config
 
 ---
 
-## The manifest
+## The genome (SKILLS)
 
-One `project.yaml` at the repo root is the single source of truth. Format spec:
-[docs/design/manifest-v1.md](docs/design/manifest-v1.md); a published
-[JSON Schema](schema/project.schema.json) gives editors autocomplete and validation.
+Start where you already think. Scaffolding a stack, evolving it, keeping it honest,
+shipping it: these are procedures, not code, so they live as Markdown a coding agent
+loads only when it triggers and improves through human-reviewed diffs. Few top-level
+skills, the less-common procedures nested as lazy references:
 
-```yaml
-schema_version: 1
-project:
-  name: my-app
-stacks:
-  - name: api
-    language: python
-    version: "3.12"
-    package_manager: uv
-    dependency_files: [pyproject.toml]
-    tasks:
-      install: uv sync
-      test: uv run pytest
+- [**`bootstrap`**](.claude/skills/bootstrap/SKILL.md) — phase 0. Interview → official
+  scaffolder → `project.yaml` → proof by gates; per-ecosystem facts (Python, Docker,
+  CI, …) load on demand.
+- [**`workflow`**](.claude/skills/workflow/SKILL.md) — the everyday SWE loop: plan,
+  build, gate, commit. Scaling up and rot-checks (staleness is hunted, not awaited)
+  load on demand.
+- [**`skill-manager`**](.claude/skills/skill-manager/SKILL.md) — the genome's own
+  lifecycle: evolve a skill when a lesson lands, absorb genes from other repos, skill
+  authoring standards. Every skill edit is a human-reviewed diff.
+- [**`socials`**](.claude/skills/socials/SKILL.md) — shipping visibly: decide →
+  optimize → draft → post for any platform, with per-platform playbooks (LinkedIn
+  feed mechanics, GitHub discoverability, post visuals). The human always posts.
+- [**`project-base`**](.claude/skills/project-base/SKILL.md) — each repo's
+  constitution: conventions, gates, module map. Written fresh at bootstrap, then
+  evolves with its repo and never syncs back.
+
+The genome ships inside the package — `initc spawn` passes it down to a new project,
+and genes can be absorbed back from any repo — gates as selection pressure, diff review
+as immunity. Not hypothetical: the first child's improvements (including this skill layout
+and `spawn` itself) were absorbed back into the base within a day.
+
+How a coding agent finds its way in any managed repo: root beacon (CLAUDE.md/AGENTS.md)
+→ the repo's own `project-base` skill → `project.yaml`.
+
+## The tools
+
+Skills draft; something has to keep them honest. `initc` answers, with exit codes and no
+AI in the room, the questions a skill must never be trusted to remember:
+
 ```
-
-## The tool
-
-```
-uv run initc spawn <dir>  # copy the genome into a project; never overwrites
+uv run initc spawn <dir>  # copy the genome in; additive, --force updates existing skills
 uv run initc describe     # inspect an existing repo, draft its project.yaml
 uv run initc validate     # is the manifest well-formed? errors teach, not scold
 uv run initc doctor       # is this machine ready? every problem prints its fix
@@ -96,34 +121,27 @@ dataset = path_to("data") / "raw.csv"     # named dirs declared under paths: in 
 
 Lines that must SHOW an absolute path (docs, tests) append `path-lint: ignore`.
 
-## The genome (SKILLS)
+## The manifest
 
-The skills are the part that evolves — few top-level, the less-common procedures
-nested as lazy references:
+Every check above reads the truth from one place: `project.yaml` at the repo root, one
+per repo. Format spec: [docs/design/manifest-v1.md](docs/design/manifest-v1.md); a
+published [JSON Schema](schema/project.schema.json) gives editors autocomplete and
+validation.
 
-- [**`bootstrap`**](.claude/skills/bootstrap/SKILL.md) — phase 0. Interview → official
-  scaffolder → `project.yaml` → proof by gates; per-ecosystem facts (Python, Docker,
-  CI, …) load on demand.
-- [**`workflow`**](.claude/skills/workflow/SKILL.md) — the everyday SWE loop: plan,
-  build, gate, commit. Scaling up and rot-checks (staleness is hunted, not awaited)
-  load on demand.
-- [**`skill-manager`**](.claude/skills/skill-manager/SKILL.md) — the genome's own
-  lifecycle: evolve a skill when a lesson lands, absorb genes from other repos, skill
-  authoring standards. Every skill edit is a human-reviewed diff.
-- [**`socials`**](.claude/skills/socials/SKILL.md) — shipping visibly: decide →
-  optimize → draft → post for any platform, with per-platform playbooks (LinkedIn
-  feed mechanics, GitHub discoverability, post visuals). The human always posts.
-- [**`project-base`**](.claude/skills/project-base/SKILL.md) — each repo's
-  constitution: conventions, gates, module map. Written fresh at bootstrap, then
-  evolves with its repo and never syncs back.
-
-The genome ships inside the package — `initc spawn` passes it down to a new project,
-and genes can be absorbed back from any repo — gates as selection pressure, diff review
-as immunity. Not hypothetical: the first child's improvements (including this skill layout
-and `spawn` itself) were absorbed back into the base within a day.
-
-How a coding agent finds its way in any managed repo: root beacon (CLAUDE.md/AGENTS.md)
-→ the repo's own `project-base` skill → `project.yaml`.
+```yaml
+schema_version: 1
+project:
+  name: my-app
+stacks:
+  - name: api
+    language: python
+    version: "3.12"
+    package_manager: uv
+    dependency_files: [pyproject.toml]
+    tasks:
+      install: uv sync
+      test: uv run pytest
+```
 
 ## Why it's shaped this way
 
@@ -135,7 +153,7 @@ them; deterministic checks do not. The full story and the design that replaced i
 
 ## Status
 
-Fresh off the pivot (2026-07). The verification tool is hardened — 120 tests, ~94%
+Fresh off the pivot (2026-07). The verification tool is hardened — 125 tests, ~94%
 coverage, every gate green in CI on both Ubuntu and Windows. The genome passed its
 first real test: [traffic-rl](https://github.com/Stepkar2004/traffic-rl) went from an
 empty folder to green gates, pre-commit hooks, and CI in one evening — and what it

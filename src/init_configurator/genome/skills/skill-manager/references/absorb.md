@@ -31,14 +31,19 @@ because horizontal transfer is exactly how a bad gene gets in.
 ## spawn <new-project-path> (vertical, this project → a child)
 
 `initc spawn <path>` is the mechanical half — a real command since 2026-07-11. It copies
-the packaged genome (skills, standards, docs templates) into the target, additive-only:
-a file that already exists is reported as kept and never overwritten. The judgment half
-stays with the agent:
+the packaged genome (skills, standards, docs templates) into the target, additive by
+default: a file that already exists is reported as kept and not overwritten. `--force`
+is the deliberate exception — it lets the base's version win for existing skill files
+only (docs and standards stay additive, and it never deletes), which is how you push
+base skill updates down into an already-spawned child. The judgment half stays with the
+agent:
 
 1. Run `initc spawn <path>` — or, in the child with nothing installed:
-   `uvx --from git+https://github.com/Stepkar2004/init-configurator initc spawn .`
-2. **Review the "kept" lines.** Existing files are the child's own; merge genome content
-   into them by hand only if the human wants it.
+   `uvx --refresh --from git+https://github.com/Stepkar2004/init-configurator initc spawn .`
+   (add `--force` to update skills the child has not changed; `--refresh` defeats uvx's cache).
+2. **Review the "kept" (and, with `--force`, "replaced") lines.** Kept files are the
+   child's own; merge genome content by hand only if the human wants it. Replaced files
+   moved to the base's version — `git diff` shows exactly what changed.
 3. `project.yaml` and the child's `project-base` skill are NOT in the genome on purpose —
    `bootstrap`/`describe` write them fresh for the child (`beacons.py` is the template
    source). Run the `bootstrap` skill next.

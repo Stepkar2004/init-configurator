@@ -77,7 +77,7 @@ The same turn any code first reads a new env var: declare it in `project.yaml`, 
 | `runner.py` | run a declared task from anywhere in the tree |
 | `path_lint.py` / `paths.py` | forbid absolute paths / make relative ones effortless |
 | `beacons.py` | template source for downstream CLAUDE.md/AGENTS.md + project skill |
-| `spawn.py` | copy the packaged genome into a target repo (additive, never overwrites) |
+| `spawn.py` | copy the packaged genome into a target repo (additive; `--force` updates existing skills only) |
 | `genome/` | the shipped genome (skills + standards + docs templates), package data |
 | `textfile.py` | every generated file is written LF, on every OS |
 | `cli.py` | `validate · doctor · env · run · lint-paths · schema · describe · spawn` |

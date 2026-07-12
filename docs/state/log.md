@@ -2,6 +2,15 @@
 
 > One entry per chunk, newest first: date · what happened · what it proved or changed.
 
+- **2026-07-11 · `initc spawn --force` + README restructure.** Spawn stayed additive by
+  default; `--force` now overwrites existing files under `.claude/skills/` ONLY (docs and
+  standards untouched, nothing ever deleted), so an already-spawned child can pull the
+  base's newer skills with `git diff` showing every change. `SpawnedFile.created` became a
+  three-state `outcome` (added/kept/replaced); `uvx` caches, so the docs now teach
+  `--refresh`. README reordered to the reader's path — Quickstart → skills → tools →
+  manifest, each with a one-line "why" before the "what". ADR 0002 amended; the "cannot
+  destroy" invariant refined to "cannot destroy what you own, and never silently."
+  125 tests, gates green.
 - **2026-07-11 · The socials skill: ship-visibly gets its HOW.** Authored from a
   four-source research pass run as parallel subagents: the longform-factory skill's
   stage architecture (VideoCreator2), a live read of ~40 real LinkedIn posts

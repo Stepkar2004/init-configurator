@@ -3,7 +3,8 @@
 The tool answers questions; it does not write your project. Surface:
 ``validate``, ``doctor``, ``env``, ``run``, ``lint-paths``, ``schema``,
 ``describe`` (draft a manifest for an existing repo), and ``spawn`` (copy the
-packaged genome into a project, additively). Generation belongs to an agent
+packaged genome into a project, additively; ``--force`` updates existing
+skills). Generation belongs to an agent
 guided by ``.claude/skills/`` -- see docs/design/agentic-base.md.
 """
 
@@ -44,6 +45,14 @@ SchemaOutOption = Annotated[Path, typer.Option(help="Where to write the JSON Sch
 SpawnArgument = Annotated[
     Path, typer.Argument(help="The project folder to receive the genome (created if missing).")
 ]
+ForceOption = Annotated[
+    bool,
+    typer.Option(
+        "--force",
+        help="Overwrite existing skill files with the base's version. "
+        "Docs, standards, and skills the base does not ship stay untouched.",
+    ),
+]
 
 
 def _fail(error: Exception) -> typer.Exit:
@@ -73,20 +82,27 @@ def describe(path: DescribeArgument = Path(".")) -> None:
 
 
 @app.command()
-def spawn(path: SpawnArgument = Path(".")) -> None:
-    """Copy the genome (skills, standards, docs templates) into a project; never overwrites."""
+def spawn(path: SpawnArgument = Path("."), force: ForceOption = False) -> None:
+    """Copy the genome into a project; additive by default, --force updates existing skills."""
     try:
-        results = spawn_genome(path)
+        results = spawn_genome(path, force_skills=force)
     except SpawnError as exc:
         raise _fail(exc) from exc
+    labels = {"added": "added   ", "replaced": "replaced", "kept": "kept    "}
     for spawned in results:
-        marker = "added" if spawned.created else "kept "
-        typer.echo(f"  {marker} {spawned.target}")
-    added = sum(1 for spawned in results if spawned.created)
-    kept = len(results) - added
-    typer.echo(f"spawned the genome into {path}: {added} added, {kept} kept")
-    if kept:
-        typer.echo("kept files existed before and were not touched - merge by hand if wanted")
+        typer.echo(f"  {labels[spawned.outcome]} {spawned.target}")
+    counts = {outcome: 0 for outcome in labels}
+    for spawned in results:
+        counts[spawned.outcome] += 1
+    typer.echo(
+        f"spawned the genome into {path}: "
+        f"{counts['added']} added, {counts['replaced']} replaced, {counts['kept']} kept"
+    )
+    if counts["kept"] and not force:
+        typer.echo(
+            "kept files existed before and were not touched - "
+            "rerun with --force to update existing skills, or merge by hand"
+        )
     typer.echo("next: run the bootstrap skill (.claude/skills/bootstrap/SKILL.md)")
 
 
