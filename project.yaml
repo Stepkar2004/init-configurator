@@ -22,8 +22,7 @@ stacks:
 
 path_lint:
   include: ["**/*.py", "**/*.md", "**/*.yaml", "**/*.yml", "**/*.toml"]
-  # CLAUDE.md (the constitution) intentionally points at a machine-local brain
-  # note — the only allowed absolute path in this repo. The packaged genome
-  # mirrors .claude/skills byte-for-byte (test-enforced), and .claude/ is excluded
-  # too: its container paths document other repos, not this one.
-  exclude: [".venv/", ".git/", "CLAUDE.md", ".claude/", "src/init_configurator/genome/"]
+  # The packaged genome mirrors .claude/skills byte-for-byte (test-enforced), so
+  # .claude/ and the genome are excluded: any container paths there document other
+  # repos, not this one. Nothing else in this repo carries an absolute path.
+  exclude: [".venv/", ".git/", ".claude/", "src/init_configurator/genome/"]

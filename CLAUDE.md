@@ -46,4 +46,3 @@ move knowledge from markdown into code constants.
 - `docs/structure.md` — the module map: every file in one line.
 - `docs/design/agentic-base.md` — the design record: the line, the organs, honest limits.
 - `docs/state/` — `now.md` (where the project is) → `roadmap.md` (next) → `log.md` (was).
-- Brain note (machine-local): `G:\PythonProjects\_for_me\The Brain v2\knowledge\projects\init-configurator.md` — read on session start.

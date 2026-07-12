@@ -17,7 +17,7 @@ real homes — session-wide rules and the module-map pointer into the constituti
 the module map into `docs/structure.md`. Teach-me and the cold-start block are gone.
 `beacons.py` now templates a downstream **constitution** (full inline, or a marked pointer
 block appended to an existing CLAUDE.md) instead of a project skill; bootstrap's interview
-gained the CLAUDE.md-style and "second brain" questions. Skills here are exactly the
+gained the CLAUDE.md-style question. Skills here are exactly the
 transferable four — `workflow`, `skill-manager`, `socials`, `bootstrap` — mirrored
 byte-identical in `src/init_configurator/genome/` (test-enforced; repo set == shipped set).
 

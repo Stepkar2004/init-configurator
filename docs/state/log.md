@@ -10,7 +10,7 @@
   templates a downstream constitution two ways — full inline, or a marked `pointer_block`
   APPENDED to an existing CLAUDE.md, never overwriting (don't invade a stranger's
   constitution, it costs their context budget). Bootstrap's interview gained the
-  CLAUDE.md-style and "second brain" questions. The spawn CLI hint about the old name
+  CLAUDE.md-style question. The spawn CLI hint about the old name
   collision is gone with the collision. `test_genome` now asserts repo skill set ==
   shipped set (no repo-only skill can creep back). The base's genome no longer names
   another project. Gates green.

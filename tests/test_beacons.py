@@ -27,27 +27,20 @@ class TestContextBeacons:
         assert "single source of truth" in files["AGENTS.md"]
         assert "AGENTS.md" in files["CLAUDE.md"]
 
-    def test_primary_points_at_the_skills_and_lists_the_tasks(
+    def test_primary_points_at_the_skills_and_the_manifest(
         self, build_manifest: ManifestFactory
     ) -> None:
         primary = context_beacons(build_manifest(), agent="claude")["CLAUDE.md"]
-        assert "initc run test" in primary  # the declared task, dynamically listed
         assert ".claude/skills/" in primary and "workflow" in primary  # the skill index
-
-    def test_brain_note_is_included_only_when_given(self, build_manifest: ManifestFactory) -> None:
-        without = context_beacons(build_manifest(), agent="claude")["CLAUDE.md"]
-        assert "Brain note" not in without
-        # a sentinel, not a real path: path-lint (correctly) rejects absolute paths in source
-        with_note = context_beacons(
-            build_manifest(), agent="claude", brain_note="<<BRAIN_NOTE_PATH>>"
-        )["CLAUDE.md"]
-        assert "Brain note (machine-local): <<BRAIN_NOTE_PATH>>" in with_note
+        # "where things live" points at project.yaml, not a copied-out task list that rots
+        assert "project.yaml" in primary and "docs/state/" in primary
+        assert "initc run <task>" in primary
 
 
 class TestConstitution:
     def test_speaks_the_task_model_not_init(self, build_manifest: ManifestFactory) -> None:
         content = constitution(build_manifest())
-        assert "initc run test" in content
+        assert "initc run <task>" in content  # points at the task runner, not a copied list
         assert "initc doctor" in content
         assert "initc init" not in content  # the command no longer exists
 

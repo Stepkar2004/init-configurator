@@ -25,9 +25,7 @@ from init_configurator.manifest import Manifest
 PrimaryChoice = Literal["agents", "claude"]
 
 
-def context_beacons(
-    manifest: Manifest, agent: PrimaryChoice, *, brain_note: str | None = None
-) -> dict[str, str]:
+def context_beacons(manifest: Manifest, agent: PrimaryChoice) -> dict[str, str]:
     """Return ``{filename: content}`` for a FRESH repo's CLAUDE.md and AGENTS.md.
 
     The primary file carries the full constitution; the other is a one-line
@@ -38,29 +36,18 @@ def context_beacons(
         ("CLAUDE.md", "AGENTS.md") if agent == "claude" else ("AGENTS.md", "CLAUDE.md")
     )
     return {
-        primary: constitution(manifest, brain_note=brain_note),
+        primary: constitution(manifest),
         pointer: _pointer_content(manifest, target=primary),
     }
 
 
-def constitution(manifest: Manifest, *, brain_note: str | None = None) -> str:
+def constitution(manifest: Manifest) -> str:
     """The full downstream constitution — CLAUDE.md/AGENTS.md for a fresh repo.
 
     Always loaded in full, so it holds must-know-only: the skill index, the line,
-    the binding rules, and the declared tasks. Generic on purpose ("the user"),
-    so it reads the same for whoever clones the base.
+    the binding rules, and where things live. Generic on purpose ("the user"), so
+    it reads the same for whoever clones the base.
     """
-    tasks = "\n".join(
-        f"- `initc run {task}` — `{command}`"
-        for stack in manifest.stacks
-        for task, command in stack.tasks.items()
-    )
-    tasks_section = tasks or "- (no tasks declared yet — add them under stacks[].tasks)"
-    brain_line = (
-        f"\n\nBrain note (machine-local): {brain_note} — read on session start."
-        if brain_note
-        else ""
-    )
     return f"""\
 <!-- The constitution: loaded in full every prompt, so it holds must-know-only.
      How to think here, never how to do a task - task knowledge lives in .claude/skills/.
@@ -85,8 +72,8 @@ def constitution(manifest: Manifest, *, brain_note: str | None = None) -> str:
 - **`project.yaml` is the single source of truth** — stacks, tasks, env vars, and data
   paths are declared there. Read it before changing setup; change IT, not around it.
 - **Gates green before every commit; commit at chunk boundaries; NEVER push.** The user
-  pushes, or explicitly says push. Run the declared gates (tasks below); `initc doctor`
-  diagnoses the machine, and every problem it prints comes with its fix.
+  pushes, or explicitly says push. Run a declared gate with `initc run <task>`; `initc
+  doctor` diagnoses the machine, and every problem it prints comes with its fix.
 - **Root-relative paths only** (`initc lint-paths` enforces it); **no global installs**
   (deps live in ./.venv or ./node_modules). The env rule: the same turn code first reads
   a new var, declare it in `project.yaml` and re-run `initc env`.
@@ -95,9 +82,13 @@ def constitution(manifest: Manifest, *, brain_note: str | None = None) -> str:
   user confirms it.
 - Post drafts live in `docs/posts/` (gitignored). No em dashes in post text.
 
-## Tasks (from project.yaml — run from any subfolder)
+## Where things live
 
-{tasks_section}{brain_line}
+- `project.yaml` — WHAT: stacks, tasks, env contract, and data paths. It is the source of
+  truth for the runnable gates; don't copy them here (this file is human-gated and would
+  rot). Run one from anywhere with `initc run <task>`; `initc doctor` checks the machine.
+- `docs/state/` — `now.md` (where the project is) → `roadmap.md` (next) → `log.md` (was).
+- `docs/vision.md` — the human-owned WHY; only the user edits it.
 """
 
 

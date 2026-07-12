@@ -39,8 +39,7 @@ downstream template — that already cost one confused spawn round-trip.
   it two ways, chosen in the bootstrap interview: a fresh repo gets `constitution()`
   inline; a repo that already has a CLAUDE.md gets a short marked `pointer_block()`
   APPENDED, never overwritten — invading a stranger's constitution costs their context
-  budget on every prompt. A new interview question also offers a machine-local "second
-  brain" pointer line for those who keep external notes.
+  budget on every prompt.
 - **Teach-me protocol and the cold-start block are gone** — the first was never
   load-bearing; the second is `workflow`'s orient step.
 
