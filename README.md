@@ -142,6 +142,13 @@ empty folder to green gates, pre-commit hooks, and CI in one evening — and wha
 learned came back as reviewed diffs (the consolidated skill layout and `initc spawn`
 itself both originated there).
 
+## Feedback and updates
+
+This is a living base — it keeps evolving as its own children teach it something worth
+absorbing, so expect it to change when there's reason to. Bugs, ideas, and "this didn't
+work for me" reports are all welcome: open an
+[issue](https://github.com/Stepkar2004/init-configurator/issues).
+
 ## License
 
 [MIT](LICENSE) © Stepan Karapetyan
