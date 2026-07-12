@@ -22,8 +22,8 @@ stacks:
 
 path_lint:
   include: ["**/*.py", "**/*.md", "**/*.yaml", "**/*.yml", "**/*.toml"]
-  # CLAUDE.md and the project-base skill intentionally point at a machine-local
-  # brain note — the only allowed absolute paths in this repo. The packaged
-  # genome mirrors .claude/skills byte-for-byte (test-enforced), so it inherits
-  # the same exemption: its container paths document other repos, not this one.
+  # CLAUDE.md (the constitution) intentionally points at a machine-local brain
+  # note — the only allowed absolute path in this repo. The packaged genome
+  # mirrors .claude/skills byte-for-byte (test-enforced), and .claude/ is excluded
+  # too: its container paths document other repos, not this one.
   exclude: [".venv/", ".git/", "CLAUDE.md", ".claude/", "src/init_configurator/genome/"]

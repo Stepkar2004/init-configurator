@@ -103,7 +103,6 @@ def spawn(path: SpawnArgument = Path("."), force: ForceOption = False) -> None:
             "kept files existed before and were not touched - "
             "rerun with --force to update existing skills, or merge by hand"
         )
-    typer.echo("note: project-base is bootstrap-managed, not spawned - bootstrap writes it fresh")
     typer.echo("next: run the bootstrap skill (.claude/skills/bootstrap/SKILL.md)")
 
 

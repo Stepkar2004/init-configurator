@@ -17,7 +17,7 @@ the periodic pass runs with FRESH context — the writer of a skill never grades
   auto-triggering for sub-procedures.
 - **Hard cap: 10 top-level skills; prefer 5-7.** At the cap, adding a skill requires
   first consolidating two related ones (merge into core + references). Current
-  top-level set (4): `project-base`, `workflow`, `skill-manager`, `bootstrap`.
+  top-level set (4): `workflow`, `skill-manager`, `socials`, `bootstrap`.
 - **Portability.** Embed the external knowledge the genome needs (e.g. authoring
   standards in `references/authoring.md`) so any coding agent operating this repo has
   it — never depend on a specific tool's plugin being installed.

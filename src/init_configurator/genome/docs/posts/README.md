@@ -1,6 +1,6 @@
 # Post drafts (local only — this whole folder is gitignored)
 
-One draft per shipped milestone (project-base convention: a milestone isn't done
+One draft per shipped milestone (the ship-visibly rule: a milestone isn't done
 without one), plus any interim reflections.
 
 Rules:

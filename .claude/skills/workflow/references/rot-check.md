@@ -1,7 +1,7 @@
 # rot-check — a check you have never watched fail is not a check
 
 > Consolidated from the standalone `rot-check` skill on 2026-07-11 (nested-skill
-> architecture, absorbed from traffic-rl).
+> architecture).
 
 Everything in this system rots: pinned versions, skill claims, docs, and — worst,
 because it is invisible — the gates themselves. A gate that silently passes everything

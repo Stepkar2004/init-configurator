@@ -1,69 +1,124 @@
-"""Context beacons: the agent-facing files every managed project carries.
+"""Context beacons: the agent-facing constitution every managed project carries.
 
 The discovery chain a coding agent walks in a freshly cloned project:
 
 1. CLAUDE.md or AGENTS.md at the root — whichever the user's agent reads
-   natively is the PRIMARY (full instructions); the other is a one-line
+   natively is the PRIMARY (the full constitution); the other is a one-line
    POINTER to it (the ``agent`` choice at bootstrap time decides which);
-2. the primary points at the instantiated project skill
-   (``.claude/skills/project-base/SKILL.md``) — workflow, ground rules, and
-   the repo's growing lessons;
-3. the skill points at ``project.yaml`` — the single source of truth.
+2. the constitution names the skills (``.claude/skills/`` — ``workflow`` first)
+   and points at ``project.yaml`` as the single source of truth.
 
-These functions are the TEMPLATE SOURCE the bootstrap skill materializes into
-a new project during phase 0. All of it is written once and owned by the
-project afterwards — never overwrite an existing beacon.
+There is no separate project skill: the constitution IS the always-loaded
+instruction layer, and the repo's growing lessons live in the ``workflow`` skill
+(through the evolve procedure), not in a per-repo skill file.
+
+These functions are the TEMPLATE SOURCE the bootstrap skill materializes into a
+new project during phase 0. A fresh repo gets the full ``constitution`` inline; a
+repo that already has a CLAUDE.md gets ``pointer_block`` APPENDED, never
+overwritten. All of it is owned by the project afterwards.
 """
 
-from datetime import date
 from typing import Literal
 
 from init_configurator.manifest import Manifest
 
 PrimaryChoice = Literal["agents", "claude"]
 
-SKILL_PATH = ".claude/skills/project-base/SKILL.md"
 
+def context_beacons(
+    manifest: Manifest, agent: PrimaryChoice, *, brain_note: str | None = None
+) -> dict[str, str]:
+    """Return ``{filename: content}`` for a FRESH repo's CLAUDE.md and AGENTS.md.
 
-def context_beacons(manifest: Manifest, agent: PrimaryChoice) -> dict[str, str]:
-    """Return ``{filename: content}`` for CLAUDE.md and AGENTS.md."""
+    The primary file carries the full constitution; the other is a one-line
+    pointer. For a repo that already has a CLAUDE.md, use ``pointer_block``
+    instead and append it — never overwrite what the user wrote.
+    """
     primary, pointer = (
         ("CLAUDE.md", "AGENTS.md") if agent == "claude" else ("AGENTS.md", "CLAUDE.md")
     )
     return {
-        primary: _primary_content(manifest),
+        primary: constitution(manifest, brain_note=brain_note),
         pointer: _pointer_content(manifest, target=primary),
     }
 
 
-def _primary_content(manifest: Manifest) -> str:
+def constitution(manifest: Manifest, *, brain_note: str | None = None) -> str:
+    """The full downstream constitution — CLAUDE.md/AGENTS.md for a fresh repo.
+
+    Always loaded in full, so it holds must-know-only: the skill index, the line,
+    the binding rules, and the declared tasks. Generic on purpose ("the user"),
+    so it reads the same for whoever clones the base.
+    """
     tasks = "\n".join(
         f"- `initc run {task}` — `{command}`"
         for stack in manifest.stacks
         for task, command in stack.tasks.items()
     )
     tasks_section = tasks or "- (no tasks declared yet — add them under stacks[].tasks)"
+    brain_line = (
+        f"\n\nBrain note (machine-local): {brain_note} — read on session start."
+        if brain_note
+        else ""
+    )
     return f"""\
-# {manifest.project.name} — agent instructions
+<!-- The constitution: loaded in full every prompt, so it holds must-know-only.
+     How to think here, never how to do a task - task knowledge lives in .claude/skills/.
+     This file grows ONLY by explicit user confirmation; skills grow through evolve. -->
+
+# {manifest.project.name} — constitution
 
 {manifest.project.description}
 
-Read the project skill FIRST: [{SKILL_PATH}]({SKILL_PATH}) — the setup
-workflow, ground rules, and this repo's accumulated lessons live there.
+**Consult the skill index before acting.** Skills carry the HOW (`.claude/skills/`):
 
-## Ground rules
+- `workflow` — any code written, changed, or resumed: the SWE loop (orient → plan →
+  implement → verify → document → commit, NEVER push → reflect). Start here when unsure.
+- `bootstrap` — phase 0: starting, scaffolding, or adopting a project or stack.
+- `skill-manager` — skill hygiene and the genome's lifecycle (evolve, absorb, authoring).
+- `socials` — posting, launching, or making the project findable. The human always posts.
 
-- **project.yaml is the single source of truth.** Runtimes, dependency files, tasks,
-  env vars, and data paths are declared there — read it before changing setup, and
-  change IT rather than working around it.
-- **Root-relative paths only.** Resolve every path from the project root (the folder
-  containing project.yaml). Never hardcode absolute paths — path-lint rejects them.
-- **No global installs.** Dependencies live inside the project (./.venv, ./node_modules).
-- If setup misbehaves, run `initc doctor` before debugging by hand.
+**The line:** skills know HOW, tools know WHETHER, `project.yaml` records WHAT.
 
-## Tasks (from project.yaml — work from any subfolder)
+## The rules (binding, not style)
 
-{tasks_section}
+- **`project.yaml` is the single source of truth** — stacks, tasks, env vars, and data
+  paths are declared there. Read it before changing setup; change IT, not around it.
+- **Gates green before every commit; commit at chunk boundaries; NEVER push.** The user
+  pushes, or explicitly says push. Run the declared gates (tasks below); `initc doctor`
+  diagnoses the machine, and every problem it prints comes with its fix.
+- **Root-relative paths only** (`initc lint-paths` enforces it); **no global installs**
+  (deps live in ./.venv or ./node_modules). The env rule: the same turn code first reads
+  a new var, declare it in `project.yaml` and re-run `initc env`.
+- **A skill edit is a code change** — reviewed diff, never silent. A lesson learned goes
+  through evolve (`skill-manager`) into a skill; this constitution grows only when the
+  user confirms it.
+- Post drafts live in `docs/posts/` (gitignored). No em dashes in post text.
+
+## Tasks (from project.yaml — run from any subfolder)
+
+{tasks_section}{brain_line}
+"""
+
+
+def pointer_block() -> str:
+    """A short marked block to APPEND to a repo's existing CLAUDE.md/AGENTS.md.
+
+    For a repo that already has a constitution of its own: never overwrite it,
+    add these pointers so an agent finds the tool and the skills. The HTML
+    comment makes the block identifiable and removable.
+    """
+    return """\
+
+<!-- init-configurator: appended by bootstrap. Safe to edit or remove. -->
+## Project setup (init-configurator)
+
+- **`project.yaml` is the single source of truth** for stacks, tasks, env, and data paths.
+  Run gates with `initc run <task>`; `initc doctor` diagnoses setup.
+- **Read `.claude/skills/workflow/SKILL.md` before writing code** (the SWE loop); see also
+  `bootstrap` (scaffolding), `skill-manager` (skill hygiene), `socials` (shipping visibly).
+- Root-relative paths only (`initc lint-paths`); no global installs; commit at chunk
+  boundaries and NEVER push — the human pushes.
 """
 
 
@@ -74,68 +129,3 @@ def _pointer_content(manifest: Manifest, target: str) -> str:
 Agent instructions live in [{target}]({target}) — read that file first; this one
 exists only so every coding agent finds its way there.
 """
-
-
-def project_skill(manifest: Manifest) -> dict[str, str]:
-    """The canonical downstream project skill — this function IS the template.
-
-    Every project scaffolded by init-configurator gets its own copy; each copy
-    evolves with its repo (the lessons section) and never syncs back here.
-    Divergence is the design.
-
-    Not to be confused with init-configurator's own checked-in
-    ``.claude/skills/project-base/SKILL.md``, which is this repo's evolved copy
-    and is not what downstream repos receive.
-    """
-    tasks = ", ".join(sorted({name for stack in manifest.stacks for name in stack.tasks}))
-    description = (
-        f"Manifest-driven setup (initc), conventions, and growing lessons for "
-        f"{manifest.project.name}; applies to every work session in this repo."
-    )
-    content = f"""\
----
-name: project-base
-description: {description}
----
-# project-base — {manifest.project.name}
-
-Instantiated from init-configurator on {date.today().isoformat()}. This copy EVOLVES
-with this repo and never syncs back to the template — divergence is the design.
-A lesson worth keeping goes through the evolve procedure
-(`skill-manager/references/evolve.md`): procedure, not anecdote, appended below
-as a reviewed diff.
-
-## The setup workflow (everything derives from project.yaml)
-
-1. `initc doctor` — is this machine ready? Three-state report, every problem
-   comes with its fix.
-2. `initc run install` — installing is a declared task like any other; it
-   creates the in-project environment (./.venv or ./node_modules).
-3. `initc run <task>` — run a declared task from anywhere in the tree
-   (declared here: {tasks or "none yet"}).
-4. `initc env` — regenerate .env.example after changing the env contract.
-5. `initc lint-paths` — no absolute paths, ever. `pre-commit install` wires it
-   into every commit via `.pre-commit-config.yaml`; nothing enforces it in CI
-   until you add it to your workflow.
-
-## Ground rules
-
-- project.yaml is the single source of truth: to change setup, change IT.
-- Root-relative paths only — use `project_root()` / `path_to()` from the
-  `init_configurator` package instead of building paths by hand.
-- No global installs: dependencies live in ./.venv or ./node_modules.
-- The env rule: the same turn code first reads a new env var, declare it in
-  project.yaml and re-run `initc env` — doctor's env-sync check fails on drift.
-- Generated files (.env.example) say so in their header — edit the manifest,
-  not the artifact. Everything else is yours to edit.
-- Commit at chunk boundaries; NEVER push — the human pushes, or explicitly
-  says push. An unpushed mistake is free; a pushed one is not.
-- Post drafts live in `docs/posts/` (gitignored). No em dashes (U+2014) in
-  post text, ever: use commas, colons, or parentheses. The `socials` skill owns
-  the posting workflow (decide -> optimize -> draft -> post; the human posts).
-
-## Lessons (append one line per real session: date · lesson; prune when stale)
-
-<!-- self-evolution starts here -->
-"""
-    return {SKILL_PATH: content}

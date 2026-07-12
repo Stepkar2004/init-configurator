@@ -63,17 +63,18 @@ skills, the less-common procedures nested as lazy references:
 - [**`socials`**](.claude/skills/socials/SKILL.md) — shipping visibly: decide →
   optimize → draft → post for any platform, with per-platform playbooks (LinkedIn
   feed mechanics, GitHub discoverability, post visuals). The human always posts.
-- [**`project-base`**](.claude/skills/project-base/SKILL.md) — each repo's
-  constitution: conventions, gates, module map. Written fresh at bootstrap, then
-  evolves with its repo and never syncs back.
+
+The session-wide rules — the skill index, the gates, where things live — are not a skill;
+they sit in the **constitution** ([`CLAUDE.md`](CLAUDE.md)), the one file an agent loads in
+full every prompt. Skills carry the HOW and load only when they trigger.
 
 The genome ships inside the package — `initc spawn` passes it down to a new project,
 and genes can be absorbed back from any repo — gates as selection pressure, diff review
 as immunity. Not hypothetical: the first child's improvements (including this skill layout
 and `spawn` itself) were absorbed back into the base within a day.
 
-How a coding agent finds its way in any managed repo: root beacon (CLAUDE.md/AGENTS.md)
-→ the repo's own `project-base` skill → `project.yaml`.
+How a coding agent finds its way in any managed repo: root beacon (CLAUDE.md/AGENTS.md,
+the always-loaded constitution) → the skills, loaded on trigger → `project.yaml`.
 
 ## The tools
 

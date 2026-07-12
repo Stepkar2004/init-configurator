@@ -2,11 +2,16 @@
 
 beacons.py is the template SOURCE the bootstrap skill materializes; nothing in
 this repo executes it at runtime anymore, which is exactly how stale content
-would ship silently. These tests hold the generated text to the post-pivot
-world: the task model, the discovery chain, and no trace of removed commands.
+would ship silently. These tests hold the generated text to the current world:
+the constitution IS the instruction layer (no separate project skill), it speaks
+the post-pivot CLI, and the append variant never claims to own the file.
 """
 
-from init_configurator.beacons import SKILL_PATH, context_beacons, project_skill
+from init_configurator.beacons import (
+    constitution,
+    context_beacons,
+    pointer_block,
+)
 from tests.conftest import ManifestFactory
 
 
@@ -22,30 +27,42 @@ class TestContextBeacons:
         assert "single source of truth" in files["AGENTS.md"]
         assert "AGENTS.md" in files["CLAUDE.md"]
 
-    def test_primary_lists_the_declared_tasks(self, build_manifest: ManifestFactory) -> None:
-        primary = context_beacons(build_manifest(), agent="claude")["CLAUDE.md"]
-        assert "initc run test" in primary
-        assert primary.count(SKILL_PATH) >= 1  # the discovery chain's next link
-
-
-class TestProjectSkill:
-    def test_skill_teaches_the_task_model_not_init(self, build_manifest: ManifestFactory) -> None:
-        content = project_skill(build_manifest())[SKILL_PATH]
-        assert "initc run install" in content
-        assert "initc init" not in content  # the command no longer exists
-        assert "initc doctor" in content
-
-    def test_skill_carries_the_env_rule_and_evolution_marker(
+    def test_primary_points_at_the_skills_and_lists_the_tasks(
         self, build_manifest: ManifestFactory
     ) -> None:
-        content = project_skill(build_manifest())[SKILL_PATH]
-        assert "env" in content and "project.yaml" in content
-        assert "<!-- self-evolution starts here -->" in content
+        primary = context_beacons(build_manifest(), agent="claude")["CLAUDE.md"]
+        assert "initc run test" in primary  # the declared task, dynamically listed
+        assert ".claude/skills/" in primary and "workflow" in primary  # the skill index
 
-    def test_skill_carries_the_absorbed_conventions(self, build_manifest: ManifestFactory) -> None:
-        """Never-push and the posts rules came back from the first child (2026-07)."""
-        content = project_skill(build_manifest())[SKILL_PATH]
+    def test_brain_note_is_included_only_when_given(self, build_manifest: ManifestFactory) -> None:
+        without = context_beacons(build_manifest(), agent="claude")["CLAUDE.md"]
+        assert "Brain note" not in without
+        # a sentinel, not a real path: path-lint (correctly) rejects absolute paths in source
+        with_note = context_beacons(
+            build_manifest(), agent="claude", brain_note="<<BRAIN_NOTE_PATH>>"
+        )["CLAUDE.md"]
+        assert "Brain note (machine-local): <<BRAIN_NOTE_PATH>>" in with_note
+
+
+class TestConstitution:
+    def test_speaks_the_task_model_not_init(self, build_manifest: ManifestFactory) -> None:
+        content = constitution(build_manifest())
+        assert "initc run test" in content
+        assert "initc doctor" in content
+        assert "initc init" not in content  # the command no longer exists
+
+    def test_carries_the_binding_rules(self, build_manifest: ManifestFactory) -> None:
+        content = constitution(build_manifest())
+        assert "single source of truth" in content and "project.yaml" in content
         assert "NEVER push" in content
-        assert "docs/posts/" in content
-        assert "em dashes" in content
-        assert "skill-manager/references/evolve.md" in content  # evolve's real home
+        assert "docs/posts/" in content and "em dashes" in content
+        assert "evolve" in content  # lessons land in a skill, not this file
+
+
+class TestPointerBlock:
+    def test_appends_without_claiming_ownership(self) -> None:
+        block = pointer_block()
+        assert block.startswith("\n")  # appended after existing content, not overwriting
+        assert "Safe to edit or remove" in block
+        assert ".claude/skills/workflow/SKILL.md" in block
+        assert "single source of truth" in block

@@ -2,6 +2,18 @@
 
 > One entry per chunk, newest first: date · what happened · what it proved or changed.
 
+- **2026-07-11 · Retired `project-base` into the constitution (ADR 0003).** The skill
+  predated `workflow`; its jobs moved to their real homes — session-wide rules and the
+  module-map pointer into `CLAUDE.md` (now a denser, human-gated constitution), lessons
+  into `workflow` via evolve, the map into `docs/structure.md`. Teach-me and the
+  cold-start block deleted. `beacons.py` lost `project_skill()`/`SKILL_PATH` and now
+  templates a downstream constitution two ways — full inline, or a marked `pointer_block`
+  APPENDED to an existing CLAUDE.md, never overwriting (don't invade a stranger's
+  constitution, it costs their context budget). Bootstrap's interview gained the
+  CLAUDE.md-style and "second brain" questions. The spawn CLI hint about the old name
+  collision is gone with the collision. `test_genome` now asserts repo skill set ==
+  shipped set (no repo-only skill can creep back). The base's genome no longer names
+  another project. Gates green.
 - **2026-07-11 · `initc spawn --force` + README restructure.** Spawn stayed additive by
   default; `--force` now overwrites existing files under `.claude/skills/` ONLY (docs and
   standards untouched, nothing ever deleted), so an already-spawned child can pull the

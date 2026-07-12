@@ -104,7 +104,7 @@ Every stage has a skill (how), a gate (whether), and an artifact (what persists)
 | 0 | Frame | — | human | a brief |
 | 1 | Shape | `bootstrap` (interview) | `initc validate` | `project.yaml`, ADRs |
 | 2 | Ground | `bootstrap` + `references/<stack>.md` | `doctor` green, `run test` passes | a working tree |
-| 3 | Contract | `project-base` | `env-sync` | `.env.example`, failing tests |
+| 3 | Contract | `workflow` (the env rule, from CLAUDE.md) | `env-sync` | `.env.example`, failing tests |
 | 4 | Build | stack references | tests, types, lint | code |
 | 5 | Verify | `rot-check` | CI | `docs/reviews/` |
 | 6 | Ship | — | generate-and-diff | a release |
@@ -344,11 +344,12 @@ kept here so nobody has to rediscover them:
 7. **Self-entrenchment.** A self-evolving system with no immune response converges on its own
    errors. The diff review and the trust ladder are not ceremony. They are the mechanism.
 
-## The tree (as built, 2026-07-11 — post-absorb, spawn shipped)
+## The tree (as built, 2026-07-11 — post-absorb, spawn shipped, project-base retired)
 
 ```
 init-configurator/
-├── CLAUDE.md                    constitution: how to think; thin; always loaded
+├── CLAUDE.md                    constitution: how to think; thin; always loaded;
+│                                holds the rules + module map project-base used to (retired 2026-07-11)
 ├── AGENTS.md                    one-line pointer at CLAUDE.md for other harnesses
 ├── README.md · LICENSE          the public face (MIT)
 ├── project.yaml                 this repo described, machine-checkably (dogfood)
@@ -358,8 +359,7 @@ init-configurator/
 ├── .pre-commit-config.yaml      this repo runs its own path-lint hook
 ├── .pre-commit-hooks.yaml       lets OTHER repos consume path-lint as a hook
 ├── .github/workflows/ci.yml     the gates in CI, both OSes, schema-drift check
-├── .claude/skills/              THE GENOME (consolidated 2026-07-11, absorbed from traffic-rl)
-│   ├── project-base/            binds every session HERE (repo-specific; not shipped)
+├── .claude/skills/              THE GENOME (consolidated 2026-07-11; every skill shipped)
 │   ├── workflow/                the SWE loop: orient → … → commit (never push) → reflect
 │   │   └── references/          scale.md · rot-check.md (lazy parts)
 │   ├── skill-manager/           lifecycle: nested-skill policy, cap, altitude, decay
@@ -383,7 +383,8 @@ init-configurator/
 └── docs/
     ├── vision.md                human-owned WHY (only the user edits; awaiting them)
     ├── state/                   now.md · roadmap.md · log.md · miss-log.md (resumability)
-    ├── decisions/               ADRs (0001 amputation · 0002 ship the genome)
+    ├── decisions/               ADRs (0001 amputation · 0002 ship the genome ·
+    │                            0003 retire project-base)
     ├── design/                  agentic-base.md (this file) · manifest-v1.md
     ├── posts/                   gitignored — drafts stay local
     ├── structure.md             every file explained in a line — the map

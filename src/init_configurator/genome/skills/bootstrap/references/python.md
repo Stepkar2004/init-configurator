@@ -53,14 +53,14 @@ gets CRLF, and formatters (ruff format, biome) then fail on files nobody edited.
 generated files with `newline="\n"` explicitly, and put `* text=auto eol=lf` in
 `.gitattributes` so git cannot undo it on checkout.
 
-## GitHub Actions pinning (verified 2026-07, absorbed from traffic-rl)
+## GitHub Actions pinning (verified 2026-07)
 
 An action's `releases/latest` lies about usable refs: astral-sh/setup-uv's latest was
 v8.x with NO floating `v8` major tag published. Before pinning any action, check
 `https://api.github.com/repos/<owner>/<repo>/tags` — use the major tag when it exists,
 exact-pin (with a dated comment) when it does not.
 
-## Machine-local tooling: the `local` dependency group (verified 2026-07, absorbed from traffic-rl)
+## Machine-local tooling: the `local` dependency group (verified 2026-07)
 
 A dependency that exists only on one machine (e.g. an editable install from a sibling
 checkout) goes in its own PEP 735 group named `local`, listed in

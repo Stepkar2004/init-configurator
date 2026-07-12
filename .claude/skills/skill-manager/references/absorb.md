@@ -1,8 +1,8 @@
 # absorb — the genome moves between detached projects
 
 > Consolidated from the standalone `absorb` skill on 2026-07-11 (nested-skill
-> architecture, absorbed from traffic-rl). Spawn was promoted to a command the same
-> day, after one proven by-hand run.
+> architecture). Spawn was promoted to a command the same day, after one proven
+> by-hand run.
 
 Projects stay detached: this is open source, and nothing may assume a stranger's clone
 syncs with anything of ours. Detached does not mean isolated. The behaviour is bacterial:
@@ -44,9 +44,9 @@ agent:
 2. **Review the "kept" (and, with `--force`, "replaced") lines.** Kept files are the
    child's own; merge genome content by hand only if the human wants it. Replaced files
    moved to the base's version — `git diff` shows exactly what changed.
-3. `project.yaml` and the child's `project-base` skill are NOT in the genome on purpose —
-   `bootstrap`/`describe` write them fresh for the child (`beacons.py` is the template
-   source). Run the `bootstrap` skill next.
+3. `project.yaml` and the child's root constitution (CLAUDE.md/AGENTS.md) are NOT in the
+   genome on purpose — `bootstrap`/`describe` write them fresh for the child (`beacons.py`
+   is the template source). Run the `bootstrap` skill next.
 4. **Record lineage** as the first line of the child's `docs/state/log.md`: "spawned
    from <parent> @ <commit> on <date>." From that moment the copies are detached — the
    child evolves alone. Divergence is the design.

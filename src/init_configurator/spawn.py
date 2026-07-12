@@ -16,9 +16,9 @@ The genome ships inside the package (``init_configurator/genome/``):
   .gitignore inside the package would apply to THIS repo's own tree)
 - ``docs/``      -> ``docs/`` in the target
 
-``project.yaml`` and the ``project-base`` skill are deliberately absent:
-``describe``/``bootstrap`` write those fresh per project (``beacons.py`` is
-their template source).
+``project.yaml`` and the root constitution (CLAUDE.md/AGENTS.md) are deliberately
+absent: ``describe``/``bootstrap`` write those fresh per project (``beacons.py``
+is their template source).
 """
 
 from __future__ import annotations

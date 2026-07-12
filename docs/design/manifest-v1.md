@@ -125,8 +125,8 @@ generated compose loads), `.pre-commit-config.yaml` wiring `initc lint-paths`. A
 rooted at `.` keeps its own README/.gitignore instead.
 
 **Context beacons (v1, shipped):** CLAUDE.md + AGENTS.md cross-pointing (primary file
-per user's agent; the other is a one-line pointer), the instantiated `project-base`
-skill, generated `.env.example`, and the `paths:` dirs the manifest declares.
+per user's agent; the other is a one-line pointer; the primary carries the full
+constitution), generated `.env.example`, and the `paths:` dirs the manifest declares.
 
 ### ROADMAP — researched, not implemented in v1
 

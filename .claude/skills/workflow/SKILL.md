@@ -4,11 +4,9 @@ description: The SWE loop binding every implementation session in this repo - fi
 ---
 # workflow — the loop every implementation session runs
 
-> Absorbed from traffic-rl, the first child, 2026-07-11 — its consolidation came back
-> as a gene, raw (2026-07). One skill fires for all SWE work; the less-common parts
-> load lazily from `references/` when their trigger row matches. Do not rely on
-> separate sibling skills auto-triggering for scale or rot-check — this file is their
-> front door.
+> One skill fires for all SWE work; the less-common parts load lazily from `references/`
+> when their trigger row matches. Do not rely on separate sibling skills auto-triggering
+> for scale or rot-check — this file is their front door.
 
 ## The loop
 
@@ -19,11 +17,12 @@ description: The SWE loop binding every implementation session in this repo - fi
 1. **Plan the chunk.** Smallest end-to-end slice; name the files to touch and the tests
    that will prove it. If scope grows mid-chunk beyond the plan, stop — re-plan or
    split; never "just keep going".
-2. **Implement.** Follow project-base conventions and the architecture rules in the
+2. **Implement.** Follow the constitution (CLAUDE.md) and the architecture rules in the
    active plan — they are constraints, not suggestions.
 3. **Verify — the forgettable steps, in order:**
    - New behavior ⇒ new test; changed behavior ⇒ changed test. Same chunk, no IOUs.
-   - Run the repo's gates (the canonical list lives in `project-base`).
+   - Run the repo's gates: `project.yaml` declares them as tasks; the constitution
+     (CLAUDE.md) and the pre-commit / CI configs are the full set.
    - User-visible behavior ⇒ actually run it — a green unit test is not a seen behavior.
 4. **Document in the same chunk.** Update whatever the change made stale: README, the
    plan doc, an ADR for any new decision (`docs/decisions/`), docstrings. The test:

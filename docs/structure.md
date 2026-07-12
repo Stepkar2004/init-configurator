@@ -1,8 +1,9 @@
 # Repo structure — what every file is for
 
 > Written 2026-07-10, the day of the amputation; updated 2026-07-11 after the first
-> absorb (traffic-rl's genes) and `initc spawn`. One sentence per folder, a line per
-> file. If this file disagrees with reality, rot-check treats that as a failing check.
+> absorb and `initc spawn`, and again when `project-base` was retired into the
+> constitution. One sentence per folder, a line per file. If this file disagrees with
+> reality, rot-check treats that as a failing check.
 
 ## Root
 
@@ -24,15 +25,15 @@
 ## `.claude/skills/` — the genome
 
 Skills are the evolving HOW; each is markdown an agent loads only when it triggers, and
-every edit to one is a human-reviewed diff. Consolidated 2026-07-11 (absorbed from
-traffic-rl): few top-level skills, less-common procedures nested as lazy references.
-The four transferable skills are mirrored byte-for-byte in the shipped genome
-(`src/init_configurator/genome/skills/`) — a test enforces it.
+every edit to one is a human-reviewed diff. Consolidated 2026-07-11: few top-level skills,
+less-common procedures nested as lazy references. Every skill is transferable — all four
+are mirrored byte-for-byte in the shipped genome (`src/init_configurator/genome/skills/`),
+a test enforces it. Session-wide rules and the module map live in the constitution
+(`CLAUDE.md`), not a skill.
 
 | Skill | What it does |
 |---|---|
-| `project-base/SKILL.md` | Binds every session in THIS repo: gates, conventions, module map, chunk discipline, env rule, lessons. Repo-specific — NOT shipped; downstream copies come from `beacons.py`. |
-| `workflow/SKILL.md` | The SWE loop for every implementation session: orient → plan → implement → verify → document → commit (never push) → reflect. |
+| `workflow/SKILL.md` | The SWE loop for every implementation session: orient → plan → implement → verify → document → commit (never push) → reflect. Also where this repo's lessons land. |
 | `workflow/references/scale.md` | When work outgrows one context: the four moves, five stress patterns, chunk definition, cold-start quiz. |
 | `workflow/references/rot-check.md` | The staleness hunt: watch every gate fail, stale-pin sweep, docs truth pass, trust decay. |
 | `skill-manager/SKILL.md` | The genome's lifecycle: nested-skill policy + cap, altitude smells, miss-log triage, the periodic pass, thresholds. |
@@ -65,7 +66,7 @@ Deterministic, runs with no AI present; answers WHETHER, never HOW.
 | `runner.py` | Runs a declared task from anywhere in the tree, cwd pinned to the stack root. |
 | `path_lint.py` | Rejects machine-absolute paths (the destructive half of the path story). |
 | `paths.py` | `project_root()` / `path_to()` — makes relative paths effortless (the constructive half). |
-| `beacons.py` | Template source for a downstream project's CLAUDE.md/AGENTS.md + project-base skill. |
+| `beacons.py` | Template source for a downstream project's CLAUDE.md/AGENTS.md constitution — full inline for a fresh repo, or a marked pointer block appended to an existing one. |
 | `spawn.py` | Copies the packaged genome into a target project — additive by default (reports what was kept); `--force` updates existing skill files only, never docs/standards, never deletes. |
 | `genome/` | The shipped genome as package data: `skills/` (mirror of the transferable skills), `standards/` (`_`-prefixed dotfiles), `docs/` templates. |
 | `textfile.py` | Every generated file is written LF explicitly, because `write_text` translates newlines. |
@@ -91,9 +92,9 @@ Deterministic, runs with no AI present; answers WHETHER, never HOW.
 | `test_describe.py` | Detection rules, FILL_ME honesty, drafts that pass load_manifest. |
 | `test_env_contract.py` | .env.example rendering, secret blanking. |
 | `test_path_lint.py` | The absolute-path scanner and its ignore marker. |
-| `test_beacons.py` | The downstream templates speak the post-pivot CLI (no `initc init` can sneak back) and carry the absorbed conventions. |
+| `test_beacons.py` | The constitution/pointer templates speak the post-pivot CLI (no `initc init` can sneak back), point at the skills, and the append variant never claims ownership. |
 | `test_spawn.py` | The genome lands additively; existing files come through byte-identical; dotfiles get real names; `--force` replaces only diverged skills and spares docs/standards. |
-| `test_genome.py` | The shipped genome equals `.claude/skills/` byte-for-byte (drift is a failing gate); no project-base ships. |
+| `test_genome.py` | The shipped genome equals `.claude/skills/` byte-for-byte (drift is a failing gate); the repo's skill set equals the shipped set. |
 | `test_runner.py` | Task lookup, disambiguation, teaching errors. |
 | `test_console_output.py` | Everything printed to a terminal is ASCII (Windows cp1252 consoles). |
 
@@ -108,6 +109,7 @@ Deterministic, runs with no AI present; answers WHETHER, never HOW.
 | `state/miss-log.md` | One line per task that matched no skill — how the genome notices its own gaps. |
 | `decisions/0001-amputate-the-scaffolder.md` | ADR recording the pivot: what was cut, why, consequences. |
 | `decisions/0002-ship-the-genome-in-the-package.md` | ADR: genome as package data, spawn's additive-only rule, why the interview lives in bootstrap. |
+| `decisions/0003-retire-project-base-into-the-constitution.md` | ADR: project-base deleted; CLAUDE.md becomes the human-gated constitution; lessons land in workflow. |
 | `posts/` | Gitignored — post drafts stay local; the published post is the public artifact. |
 | `design/agentic-base.md` | THE design document: why we stopped, the line, the organs, scaling, honest limits, the tree. |
 | `design/manifest-v1.md` | The manifest format spec (verification half stands; generation half marked history). |

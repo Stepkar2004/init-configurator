@@ -38,6 +38,10 @@ skill's rule was: promote spawn to a command once the by-hand shape is proven. I
   (`test_genome.py`). The repo dogfoods exactly what it ships; two copies of markdown
   would otherwise drift with no import error to catch it. `project-base` is exempt
   (repo-specific by design).
+  - **Amended 2026-07-11 (ADR 0003):** `project-base` was retired, so nothing is exempt
+    anymore — the repo's skill set now equals the shipped set exactly, and the test
+    asserts it. The per-project instruction layer is the constitution (CLAUDE.md),
+    templated by `beacons.py` and never shipped in the genome.
 - The genome directory is **path-lint exempt** in `project.yaml`, inheriting
   `.claude/`'s exemption: its container paths document other repos, not this one.
 
