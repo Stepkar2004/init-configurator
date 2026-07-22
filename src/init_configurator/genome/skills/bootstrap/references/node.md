@@ -56,3 +56,17 @@ tasks:
   Docker: `npm install -g pnpm@<real version>`).
 - Node's LTS cadence moves every October — check endoflife.date/nodejs before declaring
   `engines.node`, don't copy the number from an old project.
+- **Astro + TypeScript pin (raw 2026-07):** `@astrojs/check` (what `astro check` runs)
+  peers `typescript ^5.0.0 || ^6.0.0`, so the `latest` TS 7 (the native port) breaks the
+  typecheck. Pin `typescript` to the newest 5.x; verify with
+  `npm view @astrojs/check peerDependencies` before pinning. Scaffold Astro with its
+  official creator (`npm create astro@latest`), then layer these standards on top.
+- **Biome + Astro (raw 2026-07):** Biome 2.5 lints `.astro` and `.svg` by default and its
+  a11y rules fail the fresh scaffold's favicon. Scope Biome to JS/TS/JSON/CSS
+  (`files.includes: ["**", "!**/*.astro", "!**/*.svg"]`) and let `astro check` own `.astro`
+  templates.
+- **Manifest `version` is a doctor prefix-match, not an npm range (raw 2026-07):** declare
+  the node major (`version: "22"`); doctor matches it against `node --version` by segment
+  prefix, so `">=22.12.0"` never matches `22.17.0`. Keep the real floor in `package.json`
+  engines. `initc describe` copies `engines.node` verbatim into `version`, which then fails
+  doctor — fix it by hand after `describe`.

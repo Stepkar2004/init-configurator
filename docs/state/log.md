@@ -2,6 +2,15 @@
 
 > One entry per chunk, newest first: date · what happened · what it proved or changed.
 
+- **2026-07-22 · Absorbed two downstream lessons into the genome.** From traffic-rl:
+  `skill-manager/references/authoring.md` gained a "Public building, local personal layer"
+  section (the `*.local.md` + voice-in-memory convention: open-source the building, keep the
+  person local). From portfolio-site: `bootstrap/references/node.md` gained the
+  Astro/TypeScript-7/Biome pinning lessons + the manifest-`version`-is-a-doctor-prefix note.
+  Both applied to genome template AND live `.claude/skills/` copies (byte-identical,
+  test-enforced). Surfaced by the hub's genome fingerprint drift check; this is the "absorb"
+  half of the fleet standard's genome sync. Gates green (127 tests, genome test passes).
+
 - **2026-07-22 · `standard_version` field on the manifest.** Added optional
   `standard_version: int = 0` to `Manifest` (read-compatible: older manifests without
   the key stay valid). It records which fleet standard a repo targets; the hub's fleet
