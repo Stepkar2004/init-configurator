@@ -26,6 +26,14 @@ updates and commits happen at chunk boundaries and never "later".
 | Mass research / surveillance | the data outlives any context | the inbox pattern: gather to files as `raw`, digest in a FRESH context, emit a proposed skill diff, human reviews. Nothing is "remembered" — everything is written down |
 | Skill count grows | the always-loaded index itself | hand to `skill-manager`: consolidate by altitude, archive dead skills, let the miss-log say what is missing |
 
+## Before you spawn a fleet of agents
+
+Parallel subagents multiply both token burn and CPU load, and a swarm launched on a vague
+plan is the fast path to a blown quota and colliding edits. Before spawning three or more
+at once, state it out loud: how many, which model each runs, and the disjoint file or area
+each one owns so they cannot step on each other — then get an explicit go. The confirmation
+is cheap; the runaway is not.
+
 ## Context degradation (permanent note, not a solved problem)
 
 A model cannot reliably notice its own outputs degrading as context fills. That judgment

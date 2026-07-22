@@ -30,9 +30,12 @@ description: The SWE loop binding every implementation session in this repo - fi
 5. **Commit at the chunk boundary.** Gates green → `docs/state/now.md` + `log.md`
    updated → commit. **NEVER push. The user pushes, or explicitly says push** — this repo
    is public; an unpushed mistake is free, a pushed one is not.
-6. **Reflect.** A lesson landed (root cause found, default overridden, mistake repeated)?
-   → run the evolve procedure: `skill-manager/references/evolve.md`. Task matched no
-   skill? → one line in `docs/state/miss-log.md`, keep working.
+6. **Reflect — do not skip, do not defer.** Ask it literally: did a lesson land this chunk
+   (a root cause found, a tool swapped, a convention decided, a default overridden, a
+   mistake repeated)? If yes, run the evolve procedure NOW
+   (`skill-manager/references/evolve.md`) before the session ends — a lesson you plan to
+   record "later" is a lesson lost, and re-teaching it next session is the tax. Task
+   matched no skill? → one line in `docs/state/miss-log.md`, keep working.
 
 ## When to stop and ask
 

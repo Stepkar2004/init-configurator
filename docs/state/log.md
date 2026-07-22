@@ -2,6 +2,14 @@
 
 > One entry per chunk, newest first: date · what happened · what it proved or changed.
 
+- **2026-07-22 · workflow skill hardened for lesson-capture + agent-count discipline.**
+  Reflect step (6) rewritten as a non-deferrable check ("do not skip, do not defer" +
+  explicit lesson triggers + run evolve NOW), targeting the recurring "update the skill
+  when you learn" reprompt. `references/scale.md` gained a "before you spawn a fleet of
+  agents" gate (state count + model mix + disjoint files, get a go). Genome template and
+  the repo's live `.claude/skills/` copy edited together (kept in sync). Part of the
+  cross-repo fleet-standard work; gates green (125 tests, lint-paths, validate).
+
 - **2026-07-11 · Retired `project-base` into the constitution (ADR 0003).** The skill
   predated `workflow`; its jobs moved to their real homes — session-wide rules and the
   module-map pointer into `CLAUDE.md` (now a denser, human-gated constitution), lessons
