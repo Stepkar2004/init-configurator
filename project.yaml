@@ -2,6 +2,7 @@
 # Note how little a real instance needs: the format allows more (env, paths,
 # requires, doctor), this project just doesn't need them.
 schema_version: 1
+standard_version: 1
 
 project:
   name: init-configurator
