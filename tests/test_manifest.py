@@ -52,6 +52,14 @@ class TestLoadValid:
         write_manifest(tmp_path, VALID_MANIFEST)
         assert load_manifest(tmp_path).project.name == "demo"
 
+    def test_standard_version_defaults_to_zero(self, tmp_path: Path) -> None:
+        manifest = load_manifest(write_manifest(tmp_path, VALID_MANIFEST))
+        assert manifest.standard_version == 0
+
+    def test_standard_version_is_read_when_present(self, tmp_path: Path) -> None:
+        manifest = load_manifest(write_manifest(tmp_path, VALID_MANIFEST + "standard_version: 2\n"))
+        assert manifest.standard_version == 2
+
     def test_minimal_manifest_defaults(self, tmp_path: Path) -> None:
         minimal = """\
 schema_version: 1

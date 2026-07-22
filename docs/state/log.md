@@ -2,6 +2,14 @@
 
 > One entry per chunk, newest first: date · what happened · what it proved or changed.
 
+- **2026-07-22 · `standard_version` field on the manifest.** Added optional
+  `standard_version: int = 0` to `Manifest` (read-compatible: older manifests without
+  the key stay valid). It records which fleet standard a repo targets; the hub's fleet
+  checks (in The Brain v2) read it to flag repos that fall behind. Schema regenerated,
+  two tests added. This is the one change the cross-repo fleet-standard needs inside
+  init-configurator (the standard's checks and sync live in the hub, not here). Gates
+  green (127 tests, 94% coverage).
+
 - **2026-07-22 · socials: public `voice.md` mechanics + personal-overlay pointer.** Added
   `socials/references/voice.md` (generic punctuation and manner: no em/en dashes, colon as
   reveal not label, no semicolons, plain words, the manner-not-a-blacklist framing) and

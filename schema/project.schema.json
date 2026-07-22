@@ -193,6 +193,11 @@
       "title": "Schema Version",
       "type": "integer"
     },
+    "standard_version": {
+      "default": 0,
+      "title": "Standard Version",
+      "type": "integer"
+    },
     "project": {
       "$ref": "#/$defs/ProjectInfo"
     },

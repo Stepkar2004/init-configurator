@@ -163,6 +163,10 @@ class Manifest(StrictModel):
     """The whole ``project.yaml`` file."""
 
     schema_version: int
+    # Which fleet standard this repo targets. 0 = not on the fleet standard yet;
+    # the hub's fleet checks compare this against the current standard version.
+    # Optional with a default so older manifests stay valid (read-compatible).
+    standard_version: int = 0
     project: ProjectInfo
     stacks: list[Stack] = Field(min_length=1)
     env: list[EnvVar] = []
