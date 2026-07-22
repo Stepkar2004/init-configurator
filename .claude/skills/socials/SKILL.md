@@ -60,6 +60,10 @@ rhetorical questions, engagement bait ("comment YES", "tag someone who"), fake h
 openers, generic superlatives, hashtag walls. The test: if a stranger could have written
 it about any project, cut until only this project's post remains.
 
+Full punctuation and manner mechanics: [references/voice.md](references/voice.md). A
+project may add a personal `voice.local.md` overlay beside it. That overlay is the author's
+own voice: private, never synced, loaded when present.
+
 ## The paste-ready package (step 4 format)
 
 Drafts live in `docs/posts/YYYY-MM-DD-slug.md` (gitignored — drafts are local).

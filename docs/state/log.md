@@ -2,6 +2,13 @@
 
 > One entry per chunk, newest first: date · what happened · what it proved or changed.
 
+- **2026-07-22 · socials: public `voice.md` mechanics + personal-overlay pointer.** Added
+  `socials/references/voice.md` (generic punctuation and manner: no em/en dashes, colon as
+  reveal not label, no semicolons, plain words, the manner-not-a-blacklist framing) and
+  pointed the socials skill at it. Personal voice stays out of this public repo: the file
+  points to an optional private `voice.local.md` overlay (never synced, kept out of
+  published copies). Genome template + live copy added together; gates green.
+
 - **2026-07-22 · workflow skill hardened for lesson-capture + agent-count discipline.**
   Reflect step (6) rewritten as a non-deferrable check ("do not skip, do not defer" +
   explicit lesson triggers + run evolve NOW), targeting the recurring "update the skill
